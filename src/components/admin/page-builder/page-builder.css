@@ -1,0 +1,1149 @@
+/* ── Page builder edit-view shell (Phase 3b, Task 4) ────────────────────── */
+/* Uses Payload CSS custom-property theme vars, matching order-view.css.    */
+/* Dark admin theme is the production default — every fallback is dark-safe. */
+
+.pb-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100vh;
+}
+
+/* ── Top bar ─────────────────────────────────────────────────────────── */
+
+.pb-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--base);
+  padding: calc(var(--base) * 0.5) var(--base);
+  border-bottom: 1px solid var(--theme-elevation-150, #333);
+  background: var(--theme-elevation-0, #000);
+}
+
+.pb-topbar__group {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--base) * 0.5);
+}
+
+.pb-topbar__title {
+  font-weight: 600;
+}
+
+.pb-topbar__selection {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  color: var(--theme-elevation-500, #999);
+}
+
+.pb-topbar__status {
+  padding: 0.15em 0.6em;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--theme-elevation-150, #333);
+  color: var(--theme-elevation-500, #999);
+}
+
+.pb-topbar__status--published {
+  border-color: var(--theme-success-500, #4ade80);
+  color: var(--theme-success-500, #4ade80);
+}
+
+.pb-topbar__status--modified {
+  border-color: var(--theme-warning-500, #fbbf24);
+  color: var(--theme-warning-500, #fbbf24);
+}
+
+.pb-topbar__zoom {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  color: var(--theme-elevation-500, #999);
+  min-width: 3.5em;
+  text-align: right;
+}
+
+.pb-device-toggle {
+  display: inline-flex;
+  border: 1px solid var(--theme-elevation-150, #333);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.pb-device-toggle__btn {
+  padding: 0.3em 0.75em;
+  font-size: 0.8rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--theme-elevation-500, #999);
+}
+
+.pb-device-toggle__btn--active {
+  background: var(--theme-elevation-150, #333);
+  color: var(--theme-text, #fff);
+}
+
+/* ── 3-pane grid ─────────────────────────────────────────────────────── */
+/* `--pb-rail-left` / `--pb-rail-right` are set inline by PageBuilderShell —
+   they are React state (drag width, collapsed-to-icon-strip, or the user's
+   persisted preference), not something CSS alone can express. The px
+   fallbacks here only cover the (SSR-less, client-only) instant before the
+   first render sets them. */
+.pb-grid {
+  display: grid;
+  grid-template-columns: var(--pb-rail-left, 268px) 1fr var(--pb-rail-right, 372px);
+  flex: 1;
+  min-height: 0;
+}
+
+.pb-pane {
+  min-height: 0;
+  overflow: auto;
+}
+
+.pb-pane--left,
+.pb-pane--right {
+  position: relative;
+  padding: var(--base);
+  background: var(--theme-elevation-25, #0a0a0a);
+}
+
+.pb-pane--left {
+  border-right: 1px solid var(--theme-elevation-150, #333);
+}
+
+.pb-pane--right {
+  border-left: 1px solid var(--theme-elevation-150, #333);
+}
+
+/* Collapsed to an icon strip: the grid column itself shrinks to
+   `RAIL_COLLAPSED_WIDTH` via the CSS var above, so this only needs to stop
+   the (now hidden) panel content from forcing horizontal scroll and center
+   the single expand button. */
+.pb-pane--collapsed {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--base) 0;
+  overflow: hidden;
+}
+
+.pb-pane--center {
+  display: flex;
+  background: var(--theme-elevation-50, #111);
+}
+
+.pb-pane__placeholder {
+  color: var(--theme-elevation-500, #999);
+  font-size: 0.9rem;
+}
+
+/* ── Canvas stage ─────────────────────────────────────────────────────── */
+/* The viewport renders at the DEVICE width and is CSS-scaled to fit the slot
+   (see CanvasStage) — `overflow: hidden` here means a tall page clips at the
+   pane's bottom instead of pushing the 3-pane grid taller, since the scale
+   transform does not shrink the viewport's own layout box, only its paint. */
+.pb-canvas {
+  position: relative;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.pb-canvas__viewport {
+  flex-shrink: 0;
+  /* Overridden inline by CanvasStage with `100 / scale`%, so the box still
+     paints at the pane's full height after its `scale(...)` transform
+     shrinks it (final-review Important 6) — this 100% only applies before
+     JS has computed a scale, e.g. the very first unscaled paint. */
+  height: 100%;
+}
+
+.pb-preview-frame {
+  height: 100%;
+  border: none;
+  background: #fff;
+}
+
+/* Final-review Important 5 — canvas honesty banner. The canvas iframe shows
+   the saved draft; a structural edit (move/duplicate/delete) changes form
+   state immediately but the canvas doesn't reflect it until a save. Sits
+   above the viewport rather than blocking it, and stays out of the overlay's
+   own pointer-events:none layer so its dismiss button stays clickable. */
+.pb-canvas__stale-banner {
+  position: absolute;
+  top: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  background: var(--theme-warning-500, #d4a72c);
+  color: var(--theme-elevation-0, #000);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.pb-canvas__stale-dismiss {
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 0.15rem;
+  font-size: 0.9rem;
+}
+
+/* ── Selection overlay layer (Task 9) ─────────────────────────────────── */
+/* Sits OUTSIDE `.pb-canvas__viewport`'s transform (see CanvasStage's
+   docblock) — centered the same way `.pb-canvas`'s `justify-content: center`
+   centers the viewport, and sized to the viewport's POST-transform (visual)
+   width so `SelectionOverlay`'s already-scaled coordinates land correctly. */
+.pb-canvas__overlay-layer {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+  pointer-events: none;
+}
+
+.nb-selection-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Boxes are purely visual — never eat a click meant for the iframe underneath. */
+.nb-selection-overlay__box {
+  position: absolute;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.nb-selection-overlay__box--hover {
+  border: 1px dashed var(--theme-success-500, #4ade80);
+}
+
+.nb-selection-overlay__box--selected {
+  border: 2px solid var(--theme-success-500, #4ade80);
+}
+
+/* The floating tag is the one part of the overlay that IS interactive. */
+.nb-selection-overlay__tag {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  background: var(--theme-success-500, #4ade80);
+  color: var(--theme-elevation-0, #000);
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+.nb-selection-overlay__tag-type {
+  padding: 0 4px;
+  text-transform: capitalize;
+}
+
+.nb-selection-overlay__tag-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.nb-selection-overlay__tag-btn {
+  width: 1.4em;
+  height: 1.4em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.15);
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.7rem;
+  padding: 0;
+}
+
+.nb-selection-overlay__tag-btn:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.nb-selection-overlay__tag-btn--delete:hover {
+  background: var(--theme-error-500, #ef4444);
+  color: #fff;
+}
+
+/* ── Rail grips (drag-to-resize) ──────────────────────────────────────── */
+
+.pb-rail-grip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 9px;
+  cursor: col-resize;
+  touch-action: none;
+  background: transparent;
+}
+
+/* Flush against the *inner* edge, not straddling the border: the pane itself
+   is `overflow: auto` (LayersRail/BlockInspector can scroll vertically),
+   and an absolutely-positioned child that hangs outside its containing
+   block's box gets clipped by that same overflow — a grip centered on the
+   border would lose roughly half its hit area and hover highlight. */
+.pb-rail-grip--left {
+  right: 0;
+}
+
+.pb-rail-grip--right {
+  left: 0;
+}
+
+.pb-rail-grip:hover,
+.pb-rail-grip:focus-visible {
+  background: var(--theme-success-500, #4ade80);
+  opacity: 0.5;
+  outline: none;
+}
+
+/* ── Rail collapse toggle ─────────────────────────────────────────────── */
+
+.pb-rail-collapse-toggle {
+  flex-shrink: 0;
+  width: 1.8em;
+  height: 1.8em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--theme-elevation-150, #333);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--theme-elevation-500, #999);
+  cursor: pointer;
+}
+
+.pb-rail-collapse-toggle:hover {
+  background: var(--theme-elevation-150, #333);
+  color: var(--theme-text, #fff);
+}
+
+.pb-rail-collapse-toggle--inline {
+  margin-bottom: calc(var(--base) * 0.5);
+}
+
+/* ── Page settings (left pane, final-review Finding 1) ───────────────── */
+
+.nb-pb-settings-drawer {
+  margin-bottom: calc(var(--base) * 0.75);
+  border: 1px solid var(--theme-elevation-150, #333);
+  border-radius: 6px;
+  background: var(--theme-elevation-0, #000);
+}
+
+.nb-pb-settings-drawer__summary {
+  padding: 0.5em 0.6em;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--theme-text, #fff);
+  list-style: none;
+}
+
+.nb-pb-settings-drawer__summary::-webkit-details-marker {
+  display: none;
+}
+
+.nb-pb-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 0.6em 0.75em;
+}
+
+.nb-pb-settings__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nb-pb-settings__label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--theme-elevation-500, #999);
+}
+
+.nb-pb-settings__required {
+  color: var(--theme-error-500, #ef4444);
+}
+
+.nb-pb-settings__input,
+.nb-pb-settings__textarea {
+  width: 100%;
+  padding: 0.4em 0.5em;
+  font-size: 0.85rem;
+  border: 1px solid var(--theme-elevation-150, #333);
+  border-radius: 4px;
+  background: var(--theme-elevation-50, #111);
+  color: var(--theme-text, #fff);
+}
+
+.nb-pb-settings__textarea {
+  min-height: 4.5em;
+  resize: vertical;
+}
+
+.nb-pb-settings__input.is-error,
+.nb-pb-settings__textarea.is-error {
+  border-color: var(--theme-error-500, #ef4444);
+}
+
+.nb-pb-settings__error {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--theme-error-500, #ef4444);
+}
+
+.nb-pb-settings__field--checkbox {
+  flex-direction: row;
+  align-items: center;
+}
+
+.nb-pb-settings__checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--theme-text, #fff);
+  cursor: pointer;
+}
+
+/* ── Layers rail (left pane, Task 8 — replaces the Task 5 outline) ───── */
+
+.nb-pb-layers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.nb-pb-layers--empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(var(--base) * 0.5);
+}
+
+.nb-pb-layers__empty-copy {
+  color: var(--theme-elevation-500, #999);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.nb-pb-layers__gap {
+  position: relative;
+}
+
+.nb-pb-layers__insert {
+  width: 100%;
+  padding: 0.2em 0.6em;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: left;
+  border: 1px dashed transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--theme-elevation-400, #888);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+
+.nb-pb-layers__gap:hover .nb-pb-layers__insert,
+.nb-pb-layers__insert:focus-visible,
+.nb-pb-layers__insert:focus,
+.nb-pb-layers__insert[aria-expanded='true'],
+.nb-pb-layers__insert--empty {
+  opacity: 1;
+}
+
+.nb-pb-layers__insert:hover {
+  border-color: var(--theme-elevation-150, #333);
+  background: var(--theme-elevation-50, #111);
+  color: var(--theme-text, #fff);
+}
+
+/* `opacity: 0` above suppresses the browser's default focus ring along with
+   everything else about the element, so a keyboard user tabbing to a hidden
+   gap button would otherwise land on something both invisible AND
+   unindicated. The rule above makes it visible again on focus; this one
+   gives it the same brand focus ring every other admin control gets
+   (`--accessibility-outline`, set globally in skin-floor.scss) — .btn/.pill
+   get it from Payload's own CSS, but this button carries neither class, so
+   it needs its own rule rather than inheriting one. :focus is kept
+   alongside :focus-visible for engines that don't support the latter. */
+.nb-pb-layers__insert:focus-visible,
+.nb-pb-layers__insert:focus {
+  outline: var(--accessibility-outline, 2px solid var(--theme-success-500, #4ade80));
+  outline-offset: var(--accessibility-outline-offset, 2px);
+}
+
+.nb-pb-layers__insert[aria-expanded='true'] {
+  border-color: var(--theme-success-500, #4ade80);
+  color: var(--theme-success-500, #4ade80);
+}
+
+.nb-pb-layers__insert--empty {
+  align-self: flex-start;
+  padding: 0.4em 0.75em;
+  border-style: solid;
+  border-color: var(--theme-elevation-150, #333);
+}
+
+.nb-pb-layers__popover {
+  margin: 4px 0 8px;
+  padding: 8px;
+  border: 1px solid var(--theme-elevation-150, #333);
+  border-radius: 6px;
+  background: var(--theme-elevation-50, #111);
+}
+
+.nb-pb-layers__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--base) * 0.5);
+  padding: 0.2em 0.2em 0.2em 0.6em;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: var(--theme-elevation-50, #111);
+  color: var(--theme-text, #fff);
+}
+
+.nb-pb-layers__row:hover {
+  background: var(--theme-elevation-100, #1a1a1a);
+}
+
+.nb-pb-layers__row.is-selected {
+  border-color: var(--theme-success-500, #4ade80);
+  background: var(--theme-elevation-150, #222);
+}
+
+.nb-pb-layers__row-btn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 0.4em 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.nb-pb-layers__title {
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nb-pb-layers__type {
+  font-size: 0.72rem;
+  color: var(--theme-elevation-500, #999);
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.nb-pb-layers__lock {
+  font-size: 0.75rem;
+}
+
+.nb-pb-layers__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.nb-pb-layers__icon-btn {
+  width: 1.6em;
+  height: 1.6em;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--theme-elevation-150, #333);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--theme-elevation-600, #ccc);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0;
+}
+
+.nb-pb-layers__icon-btn:hover:not(:disabled) {
+  background: var(--theme-elevation-150, #333);
+  color: var(--theme-text, #fff);
+}
+
+.nb-pb-layers__icon-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.nb-pb-layers__icon-btn--remove:hover:not(:disabled) {
+  border-color: var(--theme-error-500, #ef4444);
+  color: var(--theme-error-500, #ef4444);
+}
+
+/* ── Block inspector (right pane, Task 6) ────────────────────────────── */
+
+.nb-pb-inspector {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.nb-pb-inspector__empty,
+.nb-pb-inspector__note {
+  color: var(--theme-elevation-500, #999);
+  font-size: 0.9rem;
+}
+
+.nb-pb-inspector__header {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--theme-text, #fff);
+}
+
+.nb-pb-inspector__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ── Inspector tabs: Content / Style / Layout ────────────────────────── */
+
+.nb-pb-inspector__tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--theme-elevation-150, #333);
+}
+
+.nb-pb-inspector__tab {
+  flex: 1;
+  padding: 8px 10px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--theme-elevation-500, #999);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nb-pb-inspector__tab:hover {
+  color: var(--theme-text, #fff);
+}
+
+.nb-pb-inspector__tab.is-active {
+  color: var(--theme-text, #fff);
+  border-bottom-color: var(--theme-success-500, #0a0);
+}
+
+/* ── Style control groups (Task 4) ───────────────────────────────────── */
+/* Shared by BlockInspector, BlockStyleField, and BlockStyleDefaultsField — */
+/* one control renderer, so this is the only place these rules live.       */
+
+.nb-style-group {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nb-style-group__title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--theme-elevation-500, #999);
+  margin-bottom: 6px;
+  padding: 0;
+}
+
+/* Disclosure header for the collapsible typography groups (Task 5): eyebrow,
+   heading, subheading. Renders inside the group's <legend>, so it inherits
+   that element's text styling and only needs to add the row layout. */
+.nb-style-group__disclosure {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+
+.nb-style-group__disclosure::before {
+  content: '';
+  width: 0;
+  height: 0;
+  flex-shrink: 0;
+  border-style: solid;
+  border-width: 4px 0 4px 5px;
+  border-color: transparent transparent transparent var(--theme-elevation-500, #999);
+  transition: transform 0.1s ease;
+}
+
+.nb-style-group__disclosure[aria-expanded='true']::before {
+  transform: rotate(90deg);
+}
+
+.nb-style-group__count {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--theme-success-500, #0a0);
+  color: var(--theme-input-bg, #fff);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.nb-style-group__summary {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--theme-text, #fff);
+}
+
+.nb-style-group__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.nb-style-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--theme-text, #fff);
+}
+
+.nb-style-control__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nb-style-control__label {
+  flex: 1;
+}
+
+.nb-style-control__origin {
+  font-size: 11px;
+  color: var(--theme-elevation-500, #999);
+}
+
+.nb-style-control__override {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nb-style-control__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--theme-success-500, #0a0);
+  flex: none;
+}
+
+.nb-style-control__reset {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 11px;
+  color: var(--theme-elevation-500, #999);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.nb-style-control__reset:hover {
+  color: var(--theme-text, #fff);
+}
+
+/* Switch — a binary decision rendered as a toggle, not a two-item dropdown. */
+
+.nb-style-switch {
+  display: inline-flex;
+  align-items: center;
+  width: 32px;
+  height: 18px;
+  padding: 2px;
+  border: 1px solid var(--theme-elevation-150, #333);
+  border-radius: 9999px;
+  background: var(--theme-elevation-100, #222);
+  cursor: pointer;
+}
+
+.nb-style-switch.is-on {
+  background: var(--theme-success-500, #0a0);
+  border-color: var(--theme-success-500, #0a0);
+  justify-content: flex-end;
+}
+
+.nb-style-switch__thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--theme-input-bg, #fff);
+}
+
+/* Segmented control and its scale variant — a handful of named choices, or */
+/* an ordered range, rendered as buttons instead of hidden inside a select. */
+
+.nb-style-segmented {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  border: 1px solid var(--theme-elevation-150, #333);
+  border-radius: 4px;
+  padding: 2px;
+  background: var(--theme-input-bg, transparent);
+}
+
+.nb-style-segmented--scale .nb-style-segmented__option {
+  min-width: 2em;
+  text-align: center;
+}
+
+.nb-style-segmented__option {
+  border: none;
+  background: transparent;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: var(--theme-text, #fff);
+  cursor: pointer;
+}
+
+.nb-style-segmented__option:hover {
+  background: var(--theme-elevation-100, #222);
+}
+
+.nb-style-segmented__option.is-active {
+  background: var(--theme-success-500, #0a0);
+  color: var(--theme-elevation-0, #000);
+}
+
+/* Promote-to-store-wide: the one control in this panel that writes outside  */
+/* the document being edited, so it sits apart from the groups above it, and */
+/* its confirmation reads as a warning rather than as another control.       */
+
+.nb-style-promote {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--theme-elevation-150, #333);
+}
+
+.nb-style-promote__trigger {
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 5px 10px;
+  border: 1px solid var(--theme-elevation-150, #333);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--theme-elevation-500, #999);
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nb-style-promote__trigger:hover {
+  color: var(--theme-text, #fff);
+  border-color: var(--theme-elevation-300, #555);
+}
+
+.nb-style-promote__dialog {
+  padding: 10px;
+  border: 1px solid var(--theme-elevation-150, #333);
+  border-radius: 4px;
+  background: var(--theme-elevation-50, #111);
+}
+
+.nb-style-promote__dialog p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--theme-text, #fff);
+}
+
+.nb-style-promote__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.nb-style-promote__actions button {
+  padding: 4px 10px;
+  border: 1px solid var(--theme-elevation-150, #333);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--theme-text, #fff);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.nb-style-promote__actions button:last-child {
+  border-color: var(--theme-success-500, #0a0);
+  background: var(--theme-success-500, #0a0);
+  color: var(--theme-elevation-0, #000);
+}
+
+.nb-style-promote__actions button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.nb-style-promote__saved,
+.nb-style-promote__error {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.nb-style-promote__saved {
+  color: var(--theme-success-500, #0a0);
+}
+
+.nb-style-promote__error {
+  color: var(--theme-error-500, #a00);
+}
+
+/* ── Block content editor (Payload fields in the inspector rail) ─────── */
+
+.nb-pb-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nb-pb-content__toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.nb-pb-content__expand {
+  padding: 3px 8px;
+  border: 1px solid var(--theme-elevation-150, #333);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--theme-elevation-500, #999);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.nb-pb-content__expand:hover {
+  color: var(--theme-text, #fff);
+  border-color: var(--theme-elevation-300, #555);
+}
+
+/*
+ * Payload's field components assume a roomy document canvas. In the narrow
+ * inspector rail they must not force the pane to scroll sideways — the rail
+ * scrolls vertically and every field wraps to its width instead.
+ */
+.nb-pb-content__fields {
+  min-width: 0;
+}
+
+.nb-pb-content__fields .field-type {
+  width: 100%;
+  margin-bottom: 0.6rem;
+}
+
+/* The expanded drawer is the opposite case: give the same fields real room. */
+.nb-pb-content--drawer {
+  min-width: min(720px, 80vw);
+  padding-top: 8px;
+}
+
+/* Layout knobs on the Style tab, above the vocabulary groups. */
+.nb-pb-content--layout {
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--theme-elevation-150, #333);
+  margin-bottom: 4px;
+}
+
+/* ── Block library (add-block picker, Task 7) ────────────────────────── */
+
+.nb-pb-library {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0.6em;
+  border: 1px solid var(--theme-elevation-150, #333);
+  border-radius: 6px;
+  background: var(--theme-elevation-0, #000);
+}
+
+.nb-pb-library__group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nb-pb-library__group-title {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--theme-elevation-500, #999);
+}
+
+.nb-pb-library__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nb-pb-library__item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5em;
+  padding: 0.45em 0.6em;
+  font-size: 0.85rem;
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: var(--theme-elevation-50, #111);
+  color: var(--theme-text, #fff);
+  cursor: pointer;
+}
+
+.nb-pb-library__item:hover:not(:disabled) {
+  background: var(--theme-elevation-150, #1a1a1a);
+}
+
+.nb-pb-library__item:disabled,
+.nb-pb-library__item.is-locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nb-pb-library__item-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nb-pb-library__lock {
+  flex-shrink: 0;
+  font-size: 0.85em;
+}
+
+/* Boot / failure states shown before the builder's own form state has been
+   hydrated (see the FORM HYDRATION note in PageBuilderView). The builder is
+   mounted full-bleed with no admin chrome around it, so these have to carry
+   their own padding or they land flush against the viewport edge.
+   Column, not the single-line centering this used to be (final-review
+   Important 2): each state now also carries a `BackToPagesLink`, since these
+   render before `BuilderTopBar` ever mounts and are otherwise a dead end. */
+.pb-boot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 100vh;
+  padding: 2rem;
+  color: var(--theme-elevation-500, #999);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.pb-boot__back {
+  order: -1;
+}
+
+/* The builder's only way back to the admin: it renders with no nav and no
+   Payload header, so this link is the whole exit. */
+.pb-topbar__back {
+  color: var(--theme-elevation-600, #aaa);
+  text-decoration: none;
+  font-size: 0.85rem;
+  padding: calc(var(--base) * 0.25) calc(var(--base) * 0.4);
+  border: 1px solid var(--theme-elevation-150, #333);
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.pb-topbar__back:hover,
+.pb-topbar__back:focus-visible {
+  color: var(--theme-elevation-1000, #fff);
+  border-color: var(--theme-elevation-400, #666);
+}
+
+/* ── In-place canvas text editor (Round 2, Task 3) ────────────────────── */
+/* The in-place canvas editor. Sits above the selection chrome so its caret and
+   focus ring are never clipped by an overlay box drawn for the same block.
+   `pointer-events: auto` is required: it renders inside
+   `.pb-canvas__overlay-layer`, which is `pointer-events: none` so its boxes
+   never eat a click meant for the iframe underneath — the editor is the one
+   part of that layer that must actually receive typing. */
+.pb-canvas-text-editor {
+  z-index: 3;
+  pointer-events: auto;
+}
+.pb-canvas-text-editor input {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  padding: 2px 4px;
+  border: 2px solid var(--theme-success-500, #0a0);
+  border-radius: 2px;
+  background: var(--theme-input-bg, #fff);
+  color: var(--theme-elevation-800, #111);
+}

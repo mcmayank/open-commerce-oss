@@ -1,0 +1,24 @@
+/*
+ * Marquee animation for the LogoStrip block's `marquee` variant.
+ * The track renders the logo list twice back-to-back; animating it from
+ * translateX(0) to translateX(-50%) scrolls seamlessly through both copies.
+ * Purely structural/animation CSS — no colors — so it needs no theme vars.
+ */
+@keyframes logo-marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.logo-marquee-track {
+  animation: logo-marquee-scroll 30s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-marquee-track {
+    animation: none;
+  }
+}

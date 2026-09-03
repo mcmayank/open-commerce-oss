@@ -1,0 +1,524 @@
+/*
+ * Shared site shell — nav, footer, buttons, and the `.v2` design tokens they
+ * run on. Extracted from src/app/(landing-v2)/v2.css (interior-restyle Task 1)
+ * so both root layouts — (landing-v2)'s `/` and (platform)'s interior pages —
+ * can use the same nav/footer. Import this BEFORE any page-specific stylesheet
+ * so page rules can still override on a tie; `.v2` goes on <body> in both
+ * layouts.
+ *
+ * Everything landing-section-specific (hero, stats, demo grid, steps,
+ * features, fees, ownership, pricing, faq, cta, and their reveal-on-scroll
+ * utility) stays in (landing-v2)/v2.css, which continues to rely on the
+ * tokens defined here.
+ */
+
+.v2 {
+  --ink: #171717;
+  --ink-soft: #4b4b4b;
+  /* 5.2:1 on --cloud and 5.4:1 on white at 11-13px. The concept's #8a8a8a
+     was 3.2:1, which fails WCAG AA (and Lighthouse's color-contrast) on
+     every faint caption. */
+  --ink-faint: #6b6b6b;
+  --cloud: #f7f8fa;
+  --white: #ffffff;
+  --blue: #4664af;
+  --blue-deep: #38508c;
+  --cyan: #22d3ee;
+  --line: #e6e8ee;
+  --radius: 16px;
+  /* Container width. 80rem = 1280px, Tailwind's max-w-7xl — widened from the
+     concept's 1160px by request; rem so it tracks any root font-size change. */
+  --max: 80rem;
+
+  /* --font-bolton is set on <body> by both marketing root layouts
+     (next/font/local, F37 Bolton VF); fallbacks match its metrics via
+     next/font's automatic adjustment. */
+  font-family: var(--font-bolton), system-ui, -apple-system, sans-serif;
+  background: var(--white);
+  color: var(--ink);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Concept's `*{margin:0;padding:0;box-sizing:border-box}` (line 24), ported
+   verbatim as a universal reset rather than box-sizing-only: every <p>/<ul>/
+   <blockquote> under .v2 must start from zero margin/padding, the same
+   assumption every other ported rule (.sub, .friction, .wrap, etc.) builds
+   its own spacing on top of.
+   These three universal-selector rules are wrapped in `@layer base` — not
+   cosmetic, load-bearing — because `.v2` now also sits on <body> for
+   (platform) interior pages, which style themselves with Tailwind utility
+   classes (mt-*, text-*, underline, etc). Tailwind's own utilities compile
+   into `@layer utilities`; any UNLAYERED rule beats ANY layered rule
+   regardless of source order or selector specificity (CSS Cascade Layers).
+   Left unlayered, `.v2 *{margin:0}` would silently null out every `mt-*`/
+   `mb-*` utility site-wide, and `.v2 a{color:inherit}` would strip every
+   Tailwind text-color utility off every link. Layering these as `base` lets
+   Tailwind's `@layer theme, base, components, utilities;` (declared by
+   `@import 'tailwindcss'` in platform.css/v2 has no such import) place them
+   correctly below `utilities` once both stylesheets are on the page — see
+   postcss.config.mjs, which runs @tailwindcss/postcss (and therefore
+   understands native `@layer`) over every CSS file, not just the ones that
+   `@import 'tailwindcss'`. */
+@layer base {
+  .v2 *,
+  .v2 *::before,
+  .v2 *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .v2 img {
+    display: block;
+    max-width: 100%;
+  }
+
+  .v2 a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+/* Unscoped on purpose — site-wide smooth scrolling. (landing-v2) had this via
+   an unscoped html rule; (platform) used to get it from the SmoothScroll/Lenis
+   client component, which Task 1 removes in favor of this. Single property,
+   no per-element conflict with Tailwind utilities, so it stays unlayered. */
+html {
+  scroll-behavior: smooth;
+}
+
+.v2 .wrap {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.v2 .label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+
+.v2 .sub {
+  color: var(--ink-soft);
+  font-size: 17px;
+  max-width: 560px;
+  margin-top: 16px;
+}
+
+.v2 .friction {
+  font-size: 13px;
+  color: var(--ink-faint);
+  margin-top: 14px;
+}
+
+.v2 .friction b {
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+/* nav */
+/* Child-combinator, not a bare element selector: SiteNav's root <nav> is
+   always a direct child of <body class="v2"> in both root layouts (see the
+   two layout.tsx files), but page content can render its own <nav> deeper
+   in the tree (e.g. docs sidebar, blog ToC) — a bare `.v2 nav` rule would
+   paint sticky/z-50 shell chrome onto those too and overlap the real header
+   on scroll. Scoping to `>` keeps this rule targeted at the shell's own nav. */
+.v2 > nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+
+.v2 .nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.v2 .nav-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.v2 .nav-logo .mark {
+  height: 26px;
+  width: 26px;
+  color: var(--ink);
+}
+
+.v2 .nav-logo .text {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+  color: var(--ink);
+}
+
+.v2 .nav-links {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.v2 .nav-links > a,
+.v2 .nav-dd-trigger {
+  position: relative;
+  padding: 4px 0;
+  color: inherit;
+  transition: color 0.15s ease;
+}
+
+.v2 .nav-links > a:hover,
+.v2 .nav-dd-trigger:hover {
+  color: var(--ink);
+}
+
+/* Current page: ink text plus a short blue underline. */
+.v2 .nav-links > a.active,
+.v2 .nav-dd-trigger.active {
+  color: var(--ink);
+}
+
+.v2 .nav-links > a.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--blue);
+}
+
+/* Resources disclosure */
+.v2 .nav-dd {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.v2 .nav-dd-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.v2 .nav-dd-trigger .chev {
+  width: 10px;
+  height: 10px;
+  transition: transform 0.15s ease;
+}
+
+.v2 .nav-dd-trigger[aria-expanded='true'] .chev {
+  transform: rotate(180deg);
+}
+
+.v2 .nav-dd-panel {
+  position: absolute;
+  top: calc(100% + 14px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 236px;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px -20px rgba(23, 23, 23, 0.25);
+  animation: nav-dd-in 0.15s ease both;
+}
+
+/* Bridge the hover gap between trigger and panel so mouseleave doesn't fire
+   crossing the 14px offset. */
+.v2 .nav-dd-panel::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 0;
+  right: 0;
+  height: 14px;
+}
+
+@keyframes nav-dd-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v2 .nav-dd-panel {
+    animation: none;
+  }
+}
+
+.v2 .nav-dd-panel a {
+  display: block;
+  padding: 9px 12px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.v2 .nav-dd-panel a:hover {
+  background: var(--cloud);
+}
+
+.v2 .nav-dd-panel .name {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.v2 .nav-dd-panel .desc {
+  display: block;
+  margin-top: 1px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-faint);
+}
+
+.v2 .nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Hairline between browsing links and account actions. */
+.v2 .nav-divide {
+  width: 1px;
+  height: 18px;
+  background: var(--line);
+}
+
+.v2 .nav-signin {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  transition: color 0.15s ease;
+}
+
+.v2 .nav-signin:hover {
+  color: var(--ink);
+}
+
+.v2 .nav-links a:focus-visible,
+.v2 .nav-dd-trigger:focus-visible,
+.v2 .nav-signin:focus-visible,
+.v2 .nav-dd-panel a:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Mobile disclosure toggle — hidden above the 940px breakpoint where
+   .nav-links (the full inline list) is visible instead. */
+.v2 .nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.v2 .nav-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.v2 .nav-mobile-panel {
+  display: none;
+}
+
+/* buttons */
+.v2 .btn {
+  display: inline-block;
+  padding: 13px 24px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.v2 .btn:active {
+  transform: scale(0.98);
+}
+
+.v2 .btn-primary {
+  background: var(--ink);
+  color: #fff;
+}
+
+.v2 .btn-primary:hover {
+  background: #000;
+}
+
+.v2 .btn-blue {
+  background: var(--blue);
+  color: #fff;
+}
+
+.v2 .btn-blue:hover {
+  background: var(--blue-deep);
+}
+
+.v2 .btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.v2 .btn-ghost:hover {
+  border-color: var(--ink-faint);
+}
+
+.v2 .btn-sm {
+  padding: 9px 16px;
+  font-size: 14px;
+}
+
+/* footer */
+/* Child-combinator for the same reason as `.v2 > nav` above: SiteFooter's
+   root <footer> is a direct child of <body class="v2">, but page content
+   (e.g. a blog post's own <footer>) must not pick up shell footer styling. */
+.v2 > footer {
+  border-top: 1px solid var(--line);
+  padding: 40px 0;
+  background: #fff;
+}
+
+.v2 .foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.v2 .foot .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.9;
+}
+
+.v2 .foot .logo .mark {
+  height: 22px;
+  width: 22px;
+  color: var(--ink);
+}
+
+.v2 .foot .logo .text {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+  color: var(--ink);
+}
+
+.v2 .foot .links {
+  display: flex;
+  gap: 24px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+.v2 .foot .links a:hover {
+  color: var(--ink);
+}
+
+.v2 .foot .tiny {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+/* Shell slice of the concept's 940px breakpoint (nav only — landing-section
+   media rules stay in v2.css alongside the sections they resize). */
+@media (max-width: 940px) {
+  .v2 .nav-links {
+    display: none;
+  }
+
+  .v2 .nav-toggle {
+    display: inline-flex;
+  }
+
+  .v2 .nav-mobile-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 24px 20px;
+    border-top: 1px solid var(--line);
+    background: #fff;
+    font-size: 14.5px;
+    font-weight: 500;
+    color: var(--ink-soft);
+  }
+
+  .v2 .nav-mobile-panel a:not(.btn) {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .v2 .nav-mobile-panel a:hover {
+    color: var(--ink);
+  }
+
+  .v2 .nav-mobile-panel .group-label {
+    margin-top: 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .v2 .nav-mobile-panel .group-label:first-child {
+    margin-top: 4px;
+  }
+
+  .v2 .nav-mobile-panel .btn {
+    margin-top: 12px;
+    text-align: center;
+  }
+
+  .v2 .nav-divide {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  /* Sign in lives in the mobile menu; the bar keeps logo + CTA + toggle. */
+  .v2 .nav-signin {
+    display: none;
+  }
+}

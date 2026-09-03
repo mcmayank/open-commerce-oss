@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+/* --- Merchant rich text (`store-prose`) ------------------------------------
+ *
+ * Lexical descriptions and RichText blocks are the one place a merchant writes
+ * structure we do not control: headings, lists, links, quotes. Tailwind's
+ * Preflight resets all of it — headings to `font-size: inherit; font-weight:
+ * inherit`, lists to `list-style: none` — so without these rules an authored
+ * `h3` renders pixel-identical to the paragraph above it and a bullet list
+ * loses its bullets. Measured on a live PDP before this existed: the `h3` and
+ * the `p` both computed to 14px/400 with zero margins.
+ *
+ * These call sites previously carried Tailwind's `prose` class, but
+ * `@tailwindcss/typography` is not installed — `prose` matched nothing and had
+ * been inert for the life of the storefront. Rather than add the plugin, this
+ * mirrors `.doc-prose` in `(platform)/platform.css`: hand-written, driven by
+ * the theme tokens, so nothing ships an opinionated palette that fights a
+ * tenant's colours.
+ *
+ * LAYER CHOICE IS LOAD-BEARING. `@layer components` sits after `base` (where
+ * Preflight lives), so these beat the reset — but every layer loses to
+ * UNLAYERED css, which is what `StoreTheme` emits for
+ * `h1..h6 { font-family: var(--font-heading); font-weight: <theme> }`. So a
+ * merchant's heading font and weight still win inside rich text. Do not hoist
+ * these rules out of the layer, and do not set `font-family` on headings here:
+ * either one silently overrides per-tenant theming (the `sd-bakery` preset
+ * ships `fontHeadingWeight: '500'`, and `StoreSettings.headingWeight` lets any
+ * merchant set their own).
+ *
+ * Sizes are `em`, not `rem`: the product description renders inside a
+ * `text-sm` container and the RichText block at full size, and both should
+ * stay proportionate to their own context.
+ */
+@layer components {
+  .store-prose {
+    color: var(--color-text);
+    line-height: 1.7;
+  }
+
+  /* Vertical rhythm: uniform spacing between blocks, headings tightened below. */
+  .store-prose > * + * { margin-top: 1.1em; }
+  .store-prose > :first-child { margin-top: 0; }
+  .store-prose > :last-child { margin-bottom: 0; }
+
+  .store-prose h1,
+  .store-prose h2,
+  .store-prose h3,
+  .store-prose h4,
+  .store-prose h5,
+  .store-prose h6 {
+    color: var(--color-heading);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .store-prose h1 { font-size: 1.5em; }
+  .store-prose h2 { font-size: 1.3em; }
+  .store-prose h3 { font-size: 1.15em; }
+  .store-prose h4 { font-size: 1.05em; }
+  .store-prose h5,
+  .store-prose h6 { font-size: 1em; }
+
+  /* Headings need air above and hug the content they introduce. */
+  .store-prose > * + :is(h1, h2, h3, h4, h5, h6) { margin-top: 1.8em; }
+  .store-prose :is(h1, h2, h3, h4, h5, h6) + * { margin-top: 0.5em; }
+
+  .store-prose ul,
+  .store-prose ol { padding-left: 1.5em; }
+  .store-prose ul { list-style: disc; }
+  .store-prose ol { list-style: decimal; }
+  .store-prose li::marker { color: var(--color-text-muted); }
+  .store-prose li + li { margin-top: 0.35em; }
+  .store-prose li > ul,
+  .store-prose li > ol { margin-top: 0.35em; }
+  /* Lexical nests a paragraph inside each list item; it must not re-space. */
+  .store-prose li > p { margin-top: 0; }
+
+  .store-prose a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .store-prose strong { font-weight: 600; color: var(--color-heading); }
+  .store-prose em { font-style: italic; }
+
+  .store-prose blockquote {
+    border-left: 2px solid var(--color-border);
+    padding-left: 1em;
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+
+  .store-prose hr {
+    border: 0;
+    border-top: 1px solid var(--color-border);
+    margin: 1.75em 0;
+  }
+
+  .store-prose img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    display: block;
+  }
+
+  /* Long URLs and unbroken product codes must not widen the page. */
+  .store-prose { overflow-wrap: break-word; }
+}
