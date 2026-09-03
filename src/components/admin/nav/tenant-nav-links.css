@@ -1,0 +1,155 @@
+/* Extra sidebar links appended after Payload's nav groups (afterNavLinks).
+   Surfaces custom route views that aren't collections. Theme-var based so it
+   sits cleanly in the light/dark admin; brand accent on hover. */
+
+.nb-navlinks {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--theme-elevation-100, #f0f1f3);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Font, size, weight, letter-spacing, transform and colour are shared with
+   Payload's own `.nav-group__label` below, so the appended links read as the
+   same section-heading treatment as the native nav sections rather than a
+   visibly different eyebrow style next to them. Only this rule's own layout
+   property (padding) stays here. */
+.nb-navlinks__label {
+  padding: 0.375rem 0.5rem;
+}
+
+.nb-navlink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.5rem;
+  border-radius: 8px;
+  color: var(--theme-elevation-800, #333);
+  text-decoration: none;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.nb-navlink:hover {
+  background: var(--nb-brand-soft);
+  color: var(--nb-brand);
+}
+
+.nb-navlink__icon {
+  flex-shrink: 0;
+  width: 1.1em;
+  text-align: center;
+  opacity: 0.8;
+}
+
+/* Platform-operator view: on the apex host a super-admin manages the platform,
+   not individual store content — so hide the per-store content nav groups. The
+   attribute is set by AdminNavExtras; drilling into a specific store's admin (a
+   subdomain host) shows them normally. `admin.hidden` can't do this because it
+   only receives `user`, not the host.
+
+   These ids are derived by Payload from each collection's `admin.group` NAME, so
+   renaming a group silently breaks this. `nav-groups.test.ts` asserts this list
+   matches PER_STORE_GROUPS exactly — keep them in step.
+
+   Settings is deliberately absent: Domains and Team are operator-relevant. */
+html[data-platform-nav] #nav-group-Orders,
+html[data-platform-nav] #nav-group-Catalog,
+html[data-platform-nav] #nav-group-Customers,
+html[data-platform-nav] #nav-group-Marketing,
+html[data-platform-nav] #nav-group-Storefront {
+  display: none;
+}
+
+/* ── Nav polish ────────────────────────────────────────────────────────────
+   These selectors target Payload's own nav DOM, which is an external API to
+   us. Read out of the installed Payload 3.86 packages (@payloadcms/next
+   compiled styles.css) on 6 Aug 2026:
+
+     container      .nav                    baseClass 'nav'
+     group wrapper  .nav-group               NavGroup baseClass 'nav-group'
+     group id       #nav-group-${label}      group NAME interpolated raw
+     group label    .nav-group__label        NavGroup JSX; Payload ships no
+                                              styles for this class
+     nav link       .nav__link               padding-inline-start: 0;
+                                              padding-inline-end: 30px
+     active link    .nav__link.active        already font-weight: 600;
+                                              padding-left: 0 (do not restate)
+     active marker  .nav__link-indicator     already draws the active rule:
+                                              position: absolute; inset-
+                                              inline-start: -20px; width: 2px;
+                                              height: 16px; background:
+                                              var(--theme-text)
+
+   CORRECTION (fix round 2, browser-verified 6 Aug 2026): in the live Payload
+   3.86 admin, the current nav link does NOT get an `.active` class — its
+   `className` is exactly `nav__link`, no modifier. `.nav__link.active`
+   exists in Payload's compiled stylesheet (which is what made it look
+   confirmed by reading the CSS alone), but it never matches in the DOM.
+   Payload instead marks the active link by rendering the
+   `.nav__link-indicator` element *inside* it. The active-row background
+   below therefore keys off `.nav__link:has(.nav__link-indicator)`, with
+   `.nav__link.active` kept alongside in the same selector list in case some
+   other Payload code path does apply the class — an unmatched selector in a
+   list is harmless. If a future Payload version changes this marking
+   mechanism again, re-verify against the live DOM, not just the compiled
+   CSS.
+
+   Payload's compiled styles.css wraps its rules in `@layer payload-default`.
+   This stylesheet is a plain (unlayered) import, so per the CSS cascade,
+   unlayered declarations win over layered ones regardless of selector
+   specificity — that's what lets a single-class `.nav__link` rule below
+   override `.nav__link.active`'s `padding-left: 0` without needing a
+   duplicate `.nav__link.active` padding rule. Do not add `border-left` to
+   `.nav__link`: Payload already renders `.nav__link-indicator` as the active
+   rule, and a border would draw a second, competing bar — recolour the
+   existing indicator instead.
+
+   If a Payload upgrade changes the nav markup or moves off @layer, this
+   block is the one place to re-check. Colour comes only from --nb-* and
+   --theme-* tokens.
+
+   Density: row height (`padding-block: 2.5px` + `line-height: 30px`, ~35px
+   per row) is deliberately left alone — it's already close to the minimum
+   comfortable pointer/touch target, and shrinking it would read as tidier in
+   a screenshot but worse to actually click. What was missing was rhythm, so
+   spacing is added *between* rows instead of shrinking any one row:
+   `--nb-nav-row-gap` sits on an adjacent-sibling `.nav__link + .nav__link`
+   rule so it cannot double up at the top/bottom edge of a group. Checked
+   Payload's compiled stylesheet for existing margin/gap on `.nav__link` and
+   `.nav-group` first (6 Aug 2026): `.nav__link` has none, so the row-gap
+   rule below is additive, not fighting anything. `.nav-group` already has
+   `margin-bottom: 10px` from Payload, which already gives every group a
+   consistent, even separation — a second group-spacing rule here would only
+   stack on top of that, so it is deliberately skipped. */
+
+.nav-group__label,
+.nb-navlinks__label {
+  font-family: var(--nb-font-display);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--nb-nav-label);
+}
+
+.nav__link {
+  padding-inline-start: 0.625rem;
+  border-radius: var(--nb-radius-s);
+}
+
+.nav__link + .nav__link {
+  margin-block-start: var(--nb-nav-row-gap);
+}
+
+.nav__link.active,
+.nav__link:has(.nav__link-indicator) {
+  background: var(--nb-nav-active-bg);
+}
+
+.nav__link-indicator {
+  background: var(--nb-nav-active-rule);
+}

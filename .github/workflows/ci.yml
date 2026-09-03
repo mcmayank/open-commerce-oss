@@ -1,0 +1,270 @@
+name: CI
+
+# Nothing ran the test suites on a pull request before this file existed. The
+# three workflows that predate it check import-map drift, migration snapshots,
+# and weekly screenshots — none of them run vitest, tsc, or Playwright.
+#
+# That gap is not theoretical. Three e2e suites had rotted through four separate
+# product changes before anyone noticed, because a red suite had become the
+# normal state and nothing stood out:
+#   - `.env` vs `.env.local` diverged, so the suite seeded users into PRODUCTION
+#     while the dev server authenticated against localhost (see the DATABASE_URL
+#     note below — that specific failure cannot recur here)
+#   - the admin gained a role and host-binding model the seeded user never got
+#   - authenticated admin pages stopped firing the `load` event, so every
+#     navigation waited on something that never happened
+#   - the SD Bakery storefront was redesigned and its spec was never updated
+#
+# Each was individually cheap to fix and invisible without a green baseline.
+# This workflow exists to keep that baseline green so the NEXT one is visible.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A force-push or a rapid second push should cancel the run it superseded rather
+# than paying for both.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Cheap signal first. No database, no browser, ~1-2 minutes. Most regressions
+  # surface here, and `e2e` below refuses to spend its minutes until this passes.
+  checks:
+    name: Typecheck & unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          # 24, matching the version this app is developed and verified on —
+          # NOT the 22 the other workflows use. Those check import-map drift and
+          # migration snapshots; none of them boots the app, so their Node choice
+          # carries no evidence about running it.
+          #
+          # The storefront's tenant home routes return 500 under Node 22 in CI
+          # with `TypeError: Cannot read properties of undefined (reading
+          # 'call')` — a webpack module-factory failure — while the same routes,
+          # same commit, same cleared build cache, return 200 on Node 24 locally.
+          # `engines` permits >=20.9.0, so 22 is legal; it is just not the
+          # version anything was tested against.
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Velite generates the content layer the app imports from. `predev`/`build`
+      # run it automatically; a bare tsc does not, and without it the content
+      # imports fail to resolve.
+      - run: pnpm velite
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: pnpm vitest run
+
+      # Core may never import hosted code (oss/manifest.json); fails on new edges.
+      - name: Core/hosted boundary
+        run: pnpm boundary
+
+      # Produce the OSS tree (blocking leak scan) and prove it still typechecks
+      # and unit-tests on its own.
+      - name: OSS export (leak scan, typecheck + unit tests of the exported tree)
+        run: |
+          pnpm oss:export
+          cd dist-oss
+          pnpm install --no-frozen-lockfile
+          # Regenerate payload-types from the EXPORTED config (no tenants collection,
+          # no tenant fields) so the typecheck proves core never touches a tenant.
+          # generate:types never connects; the URL only has to parse.
+          DATABASE_URL=postgres://u:p@127.0.0.1:5432/oss PAYLOAD_SECRET=ci S3_BUCKET=generation-placeholder \
+            npx cross-env NODE_OPTIONS=--no-deprecation payload generate:types
+          npx tsc --noEmit
+          pnpm vitest run
+          cd ..
+          # The shipped migration baseline must match the exported config.
+          pnpm oss:migrations:check
+
+  e2e:
+    name: End-to-end
+    runs-on: ubuntu-latest
+    # Guards against a hung navigation burning the six-hour default. Directly
+    # relevant here: the bug that motivated this workflow was pages that never
+    # fire `load`, which presents as a test that waits forever rather than fails.
+    timeout-minutes: 30
+    needs: checks
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: niblr_ci
+        ports:
+          - 5432:5432
+        # Without this the first migration can race the server's startup.
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # Set EXPLICITLY, and this is the load-bearing line in the file.
+      #
+      # `.env*` is gitignored, so no env file exists on a runner. `pg` treats an
+      # empty connection string as "use my default" (127.0.0.1:5432), which is
+      # exactly the silent-fallback trap `src/lib/migration-guard.ts` documents —
+      # but `resolveDatabaseUrl()` throws on an unset value rather than allowing
+      # it. So the only database this job can reach is the service container
+      # above. There is no code path from CI to a real database.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/niblr_ci
+
+      # S3_BUCKET is deliberately NOT set, and setting it is a trap worth naming.
+      # The storage plugin is registered unconditionally and switched on by the
+      # presence of that variable (see the docblock in src/payload.config.ts), so
+      # a placeholder value does not make it inert — it ENABLES the S3 adapter,
+      # and the seed scripts then attempt real uploads and die on AccessDenied.
+      # Verified: with `S3_BUCKET=generation-placeholder`, `pnpm seed` fails part
+      # way through, leaving tenants half-created. Unset, storage falls back to
+      # disk exactly as local development does. The placeholder belongs only on
+      # the `generate:*` and `migrate:create` scripts, which this job never runs.
+
+      # Tenant subdomains resolve against this, and the storefront specs use
+      # `<tenant>.localhost:3000` (tests/helpers/hosts.ts).
+      #
+      # `*.localhost`, not `*.lvh.me`, because browsers treat localhost and its
+      # subdomains as a SECURE CONTEXT even over plain http. On a production
+      # build — which is what this job runs — Next marks its own
+      # `__prerender_bypass` draft-mode cookie `Secure`; on lvh.me the browser
+      # dropped it, draft mode never turned on, and the page builder's
+      # in-place-editing test had to be skipped here entirely. playwright.config.ts
+      # sets this too, so a local run matches CI without depending on `.env`.
+      NEXT_PUBLIC_ROOT_DOMAIN: localhost:3000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          # 24, matching the version this app is developed and verified on —
+          # NOT the 22 the other workflows use. Those check import-map drift and
+          # migration snapshots; none of them boots the app, so their Node choice
+          # carries no evidence about running it.
+          #
+          # The storefront's tenant home routes return 500 under Node 22 in CI
+          # with `TypeError: Cannot read properties of undefined (reading
+          # 'call')` — a webpack module-factory failure — while the same routes,
+          # same commit, same cleared build cache, return 200 on Node 24 locally.
+          # `engines` permits >=20.9.0, so 22 is legal; it is just not the
+          # version anything was tested against.
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Chromium resolves `*.localhost` itself without consulting DNS, so the
+      # BROWSER needs nothing here. These entries exist for anything Node-side
+      # that resolves a tenant host through the OS resolver, where `*.localhost`
+      # is not guaranteed. Cheap insurance, and it depends on no external DNS at
+      # all — the previous `lvh.me` entries pointed at someone else's domain.
+      - name: Resolve tenant subdomains locally
+        run: |
+          sudo tee -a /etc/hosts >/dev/null <<'HOSTS'
+          127.0.0.1 sdbakery.localhost
+          127.0.0.1 store-a.localhost
+          127.0.0.1 store-b.localhost
+          HOSTS
+
+      # Generated per run, never committed, never reused. These only need to
+      # EXIST: the seed scripts refuse to run without them (seed passwords are no
+      # longer committed literals), and no e2e spec authenticates as a seeded
+      # merchant — the admin and page-builder specs each seed their own user, and
+      # the storefront specs do not log in at all. So there is nothing here for a
+      # repository secret to hold.
+      - name: Generate throwaway secrets
+        run: |
+          set -euo pipefail
+          # The mask directive goes to the STEP'S STDOUT; only the value goes to
+          # $GITHUB_ENV. Writing them together is what broke run 33323523815: the
+          # helper echoed `::add-mask::$v` and the surrounding `$( )` captured it,
+          # so the env file got `PAYLOAD_SECRET=::add-mask::<value>` and GitHub
+          # rejected it with "Invalid format". Masking still matters — without it
+          # every later step's env dump prints these in clear text, as it did in
+          # run 33322062898.
+          emit() {
+            name="$1"; shift
+            value="$(openssl rand "$@")"
+            echo "::add-mask::$value"
+            echo "$name=$value" >> "$GITHUB_ENV"
+          }
+          emit PAYLOAD_SECRET -hex 32
+          emit PREVIEW_SECRET -hex 32
+          emit DEV_SEED_PASSWORD -base64 18
+          emit SDBAKERY_SEED_PASSWORD -base64 18
+
+      - run: pnpm velite
+
+      - name: Run migrations
+        run: pnpm payload migrate
+
+      # `pnpm seed` creates store-a and store-b, which the fonts spec and the
+      # homepage "links every live store" test both need. `seed:sdbakery` creates
+      # the tenant the storefront specs exercise end to end.
+      - name: Seed demo tenants
+        run: |
+          pnpm seed
+          pnpm seed:sdbakery
+
+      - run: pnpm exec playwright install --with-deps chromium
+
+      # Playwright builds and starts the server itself via `webServer` in
+      # playwright.config.ts, so there is nothing to launch or warm up here.
+      #
+      # A PRODUCTION BUILD, not the dev server, and that is load-bearing. Under
+      # `next dev` on a runner every tenant home route returned 500 while a
+      # product page on the same tenant returned 200. The response body put the
+      # blame precisely: `__webpack_require__` returning undefined via
+      # `preloadModule` -> `requireAsyncModule`, i.e. on-demand compilation
+      # failing to produce a client-component chunk. Home pages render
+      # page-builder blocks and are full of client components; product pages are
+      # not. That cost six CI cycles. A production build compiles everything up
+      # front, so the failure cannot happen, and it tests what actually ships.
+      #
+      # Two consequences worth knowing before changing this back:
+      #  - the build is slow, hence webServer.timeout of 15 minutes;
+      #  - a production build marks cookies `Secure`. That is fine here because
+      #    the suite drives `*.localhost`, which browsers treat as a secure
+      #    context even over http, so the cookies are stored normally.
+      #
+      # `list` alongside the HTML report because the config's html-only reporter
+      # made the first failing run nearly undiagnosable from the log — no
+      # per-test lines at all, just a final count. The artifact remains the
+      # detailed record.
+      - name: E2E tests
+        run: pnpm test:e2e
+
+      # The HTML report is the only way to see WHY a run failed without
+      # reproducing it locally, and it carries the per-test snapshots that made
+      # the last four root causes findable.
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14

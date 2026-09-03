@@ -1,0 +1,64 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+/.idea/*
+!/.idea/runConfigurations
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files — ignore all .env files except .env.example
+.env*
+!.env.example
+test.env
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+/media
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Velite (generated content layer)
+.velite/
+/public/static/
+.superpowers/
+
+# Agent worktrees — full repo copies, never part of a commit
+.claude/worktrees/
+
+# OSS export output (oss/export.mjs) and leak-scan test scratch dirs
+/dist-oss/
+/dist-oss-test-*/
+/dist-oss-install.log
+/.dist-oss-node_modules/

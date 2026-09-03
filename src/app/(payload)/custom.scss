@@ -1,0 +1,27 @@
+@import './skin-floor.scss';
+
+// F37 Bolton (variable, wght 20–900) — the same file the marketing site
+// self-hosts via next/font. The Payload root layout is generated ("do not
+// modify"), so the admin loads it through this sanctioned stylesheet hook
+// instead: the bundler resolves and hashes the url() like any asset.
+// F37-EULA licensed — review before the repo goes public.
+@font-face {
+  font-family: 'F37 Bolton';
+  src: url('../../fonts/F37Bolton-VF.woff2') format('woff2-variations');
+  font-weight: 20 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+// Payload's entire admin UI reads var(--font-body); declared after
+// @payloadcms/next/css in the layout, so this override wins the cascade.
+:root {
+  --font-body: 'F37 Bolton', system-ui, -apple-system, sans-serif;
+}
+
+// Host-bound admin: the subdomain fixes the tenant, so hide the tenant selector.
+[data-host-bound='true'] {
+  .tenant-selector {
+    display: none;
+  }
+}

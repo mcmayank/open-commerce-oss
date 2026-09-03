@@ -1,0 +1,24 @@
+/*
+ * Marquee animation for the Ticker block's `marquee` variant.
+ * The track renders the phrase list twice back-to-back; animating from
+ * translateX(0) to translateX(-50%) scrolls seamlessly through both copies.
+ * Structural/animation only — no colors — so it needs no theme vars.
+ */
+@keyframes ticker-marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-marquee-track {
+  animation: ticker-marquee-scroll 24s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-marquee-track {
+    animation: none;
+  }
+}

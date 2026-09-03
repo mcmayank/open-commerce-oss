@@ -1,0 +1,102 @@
+name: Migration snapshots
+
+# Every migration ships a generated schema snapshot (`src/migrations/*.json`)
+# that the NEXT `migrate:create` diffs against. If a snapshot describes a schema
+# no database has, every later migration inherits a phantom statement.
+#
+# That is not hypothetical. `public.invoices.prefix` carries a column
+# DEFAULT '' contributed by the s3Storage plugin, and payload.config.ts gates
+# that whole plugin on S3_BUCKET. A snapshot generated on a machine with the
+# variable unset therefore records the column WITHOUT its default — and since
+# neither .env nor .env.local carries S3_BUCKET, that is the default outcome
+# for anyone generating a migration locally.
+#
+# The result is a spurious `ALTER TABLE "invoices" ALTER COLUMN "prefix" SET
+# DEFAULT ''` in every subsequent diff. It reads exactly like a stale database
+# default, it is not one, and tracing it through the snapshot chain shows it
+# flip-flopping since 26 Jul 2026 as different people generated migrations with
+# and without the variable. Each time, someone deleted the noise by hand and the
+# snapshot drifted further.
+#
+# The sibling `Import map` workflow catches the same root cause in the other
+# generated artifact. This job covers the snapshots.
+#
+# `package.json` now defaults S3_BUCKET for generation commands, so a developer
+# using `pnpm migrate:create` cannot produce a bad snapshot. This job is the net
+# for anyone invoking `payload migrate:create` directly, or on a machine where
+# that guard is bypassed.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  drift:
+    name: committed snapshots match a fresh generation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Diff the schema against the newest committed snapshot
+        env:
+          # Neither value is ever dialled: migrate:create diffs the Payload
+          # schema against the committed snapshot and opens no connection —
+          # verified against a database that does not exist.
+          #
+          # S3_BUCKET must be non-empty or the s3Storage plugin is skipped and
+          # the generated schema legitimately lacks the fields it contributes,
+          # which is the exact drift this job exists to catch.
+          #
+          # DATABASE_URL must be set because resolveDatabaseUrl()
+          # (src/lib/migration-guard.ts) refuses to fall through to pg's
+          # localhost default.
+          #
+          # PAYLOAD_SECRET must be set because `migrate:create` calls
+          # payload.init(), which throws "missing secret key" without it. This
+          # is where it differs from the sibling Import map job, whose
+          # `generate:importmap` only constructs the config and never inits —
+          # do not copy that job's env block here and assume it is enough. The
+          # value signs nothing on this path; the process exits after diffing.
+          S3_BUCKET: ci-placeholder-not-a-real-bucket
+          DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
+          PAYLOAD_SECRET: ci-placeholder-not-a-real-secret
+        # stdin is closed deliberately. When there is no drift, migrate:create
+        # asks "No schema changes detected. Would you like to create a blank
+        # migration file?" and waits — without a TTY that hangs until the job
+        # times out, which looks like a broken runner rather than a clean tree.
+        run: npx cross-env NODE_OPTIONS=--no-deprecation payload migrate:create ci_drift_probe < /dev/null
+
+      - name: Fail if a new migration was generated
+        run: |
+          if [ -n "$(git status --porcelain -- src/migrations)" ]; then
+            echo "::error file=src/migrations::The committed schema snapshots do not match a fresh generation."
+            echo
+            echo "A migration was generated from an unchanged tree, which means the newest"
+            echo "committed snapshot describes a schema no database has."
+            echo
+            echo "If the generated statement is 'ALTER COLUMN \"prefix\" SET DEFAULT', the"
+            echo "newest snapshot was produced with S3_BUCKET unset. Do NOT write a migration"
+            echo "to drop that default — it is contributed by the s3Storage plugin and the"
+            echo "databases are correct. Restore \"default\": \"''\" on public.invoices.prefix"
+            echo "in the newest src/migrations/*.json instead."
+            echo
+            echo "Otherwise, a real schema change was made without a migration. Run:"
+            echo "  pnpm migrate:create <name>"
+            echo
+            git --no-pager status --porcelain -- src/migrations
+            git --no-pager diff -- src/migrations
+            exit 1
+          fi
+          echo "Committed snapshots match a fresh generation."

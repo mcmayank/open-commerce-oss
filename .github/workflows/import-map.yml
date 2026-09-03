@@ -1,0 +1,71 @@
+name: Import map
+
+# Payload's admin import map is a generated file that must be committed. It has
+# silently drifted three times: a regeneration run on a machine with S3_BUCKET
+# unset drops `@payloadcms/storage-s3/client#S3ClientUploadHandler`, because
+# payload.config.ts gates the whole s3Storage plugin on that variable. The
+# deletion then rides along in an unrelated commit — twice it arrived inside a
+# commit whose message said "docs:".
+#
+# In production the entry IS required: the upstream plugin registers that
+# handler unconditionally, so a missing map entry logs
+# "PayloadComponent not found in importMap" on every admin render.
+#
+# This job regenerates the map and fails if the committed copy differs.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  drift:
+    name: committed map matches a fresh generation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Regenerate the import map
+        env:
+          # Both values are placeholders and neither is ever dialled:
+          # `generate:importmap` constructs the Payload config object and walks
+          # its components, but opens no connection.
+          #
+          # S3_BUCKET must be non-empty or the s3Storage plugin is skipped and
+          # the generated map legitimately lacks S3ClientUploadHandler — which
+          # is the exact drift this job exists to catch, so an unset value here
+          # would make the check pass on a broken map.
+          #
+          # DATABASE_URL must be set because resolveDatabaseUrl() (see
+          # src/lib/migration-guard.ts) now refuses to fall through to pg's
+          # localhost default.
+          S3_BUCKET: ci-placeholder-not-a-real-bucket
+          DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
+        run: npx cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap
+
+      - name: Fail if the committed map is stale
+        run: |
+          if ! git diff --quiet -- 'src/app/(payload)/admin/importMap.js'; then
+            echo "::error file=src/app/(payload)/admin/importMap.js::The committed import map does not match a fresh generation."
+            echo
+            echo "Regenerate and commit it:"
+            echo "  S3_BUCKET=<your bucket> pnpm payload generate:importmap"
+            echo
+            echo "If the diff REMOVES S3ClientUploadHandler, you generated it with"
+            echo "S3_BUCKET unset. Set it and regenerate — do not commit the removal."
+            echo
+            git --no-pager diff -- 'src/app/(payload)/admin/importMap.js'
+            exit 1
+          fi
+          echo "Import map is up to date."
