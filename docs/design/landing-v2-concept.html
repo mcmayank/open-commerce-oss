@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Niblr — Open your store tonight.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#171717;
+    --ink-soft:#4b4b4b;
+    --ink-faint:#8a8a8a;
+    --cloud:#F7F8FA;
+    --white:#ffffff;
+    --blue:#4664AF;
+    --blue-deep:#38508c;
+    --cyan:#22D3EE;
+    --line:#e6e8ee;
+    --radius:16px;
+    --max:1160px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    background:var(--white);color:var(--ink);line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  img{display:block;max-width:100%}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+  .label{font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--blue)}
+  h1,h2,h3{letter-spacing:-.02em}
+  h2{font-size:clamp(28px,4vw,40px);line-height:1.05;font-weight:800}
+  .sub{color:var(--ink-soft);font-size:17px;max-width:560px;margin-top:16px}
+  .friction{font-size:13px;color:var(--ink-faint);margin-top:14px}
+  .friction b{color:var(--ink-soft);font-weight:600}
+
+  nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .nav-logo img{height:26px;width:auto}
+  .nav-links{display:flex;gap:28px;font-size:14px;font-weight:500;color:var(--ink-soft)}
+  .nav-links a:hover{color:var(--ink)}
+  .btn{
+    display:inline-block;padding:13px 24px;border-radius:10px;font-size:15px;font-weight:600;
+    transition:transform .15s ease, background .15s ease;cursor:pointer;border:none;
+  }
+  .btn:active{transform:scale(.98)}
+  .btn-primary{background:var(--ink);color:#fff}
+  .btn-primary:hover{background:#000}
+  .btn-blue{background:var(--blue);color:#fff}
+  .btn-blue:hover{background:var(--blue-deep)}
+  .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--ink-faint)}
+  .btn-sm{padding:9px 16px;font-size:14px}
+
+  /* hero */
+  .hero{background:var(--cloud);overflow:hidden}
+  .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;padding:80px 0 64px}
+  .hero h1{font-size:clamp(46px,6.8vw,78px);line-height:.97;font-weight:900}
+  .hero h1 .accent{color:var(--blue)}
+  .hero .sub{font-size:18px;margin-top:22px}
+  .hero-ctas{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
+
+  .sector-tabs{display:flex;gap:8px;margin-top:36px;flex-wrap:wrap}
+  .sector-tab{
+    padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:#fff;
+    font-size:13.5px;font-weight:600;cursor:pointer;color:var(--ink-soft);font-family:inherit;
+    transition:all .15s ease;
+  }
+  .sector-tab:hover{border-color:var(--ink-faint)}
+  .sector-tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .sector-hint{font-size:12px;color:var(--ink-faint);margin-top:10px}
+
+  .hero-photo{position:relative}
+  .hero-stage{position:relative;border-radius:20px;overflow:hidden;height:540px;box-shadow:0 30px 60px -30px rgba(23,23,23,.35)}
+  .hero-stage img{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    opacity:0;transition:opacity .45s ease;
+  }
+  .hero-stage img.show{opacity:1}
+  .float-card{
+    position:absolute;background:#fff;border-radius:14px;padding:14px 18px;
+    box-shadow:0 16px 40px -12px rgba(23,23,23,.25);z-index:3;
+  }
+  .float-fee{bottom:26px;left:-24px}
+  .float-fee .big{font-size:30px;font-weight:800;color:var(--blue);line-height:1}
+  .float-fee .small{font-size:12px;color:var(--ink-soft);margin-top:4px}
+  .float-order{top:26px;right:-14px;display:flex;align-items:center;gap:10px}
+  .float-order .dot{width:9px;height:9px;border-radius:50%;background:var(--cyan);flex:none;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .float-order .small{font-size:13px;font-weight:600}
+  .float-order .tiny{font-size:11px;color:var(--ink-faint)}
+  .store-chip{
+    position:absolute;bottom:26px;right:22px;z-index:3;
+    background:rgba(23,23,23,.78);backdrop-filter:blur(8px);color:#fff;border-radius:12px;
+    padding:12px 16px;font-size:13px;max-width:250px;
+  }
+  .store-chip .name{font-weight:700;font-size:15px}
+  .store-chip .tag{font-size:11px;color:rgba(255,255,255,.65);margin-top:2px}
+  .store-chip .tag .real{color:var(--cyan);font-weight:700}
+  .store-chip a{display:inline-block;margin-top:8px;font-size:12px;font-weight:600;color:#fff;border-bottom:1px solid rgba(255,255,255,.4)}
+
+  /* ticker */
+  .ticker{border-top:1px solid var(--line);background:#fff}
+  .ticker-inner{display:flex;overflow:hidden;white-space:nowrap;padding:14px 0;font-size:13px;font-weight:500;color:var(--ink-soft)}
+  .ticker-track{display:flex;gap:40px;animation:scroll 32s linear infinite}
+  @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .ticker-track span{padding-right:0}
+  .ticker-track span b{color:var(--ink)}
+
+  /* stat strip */
+  .stats{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--white)}
+  .stats-grid{display:grid;grid-template-columns:repeat(5,1fr)}
+  .stat{padding:28px 18px;border-left:1px solid var(--line);text-align:center}
+  .stat:first-child{border-left:none}
+  .stat .v{font-size:clamp(24px,2.6vw,34px);font-weight:800;letter-spacing:-.02em;color:var(--ink)}
+  .stat .v em{font-style:normal;color:var(--blue)}
+  .stat .t{font-size:12px;color:var(--ink-faint);margin-top:4px}
+
+  section{padding:96px 0}
+  .sec-head{max-width:640px;margin-bottom:52px}
+
+  /* stores like yours */
+  .demo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .demo-card{
+    position:relative;border-radius:var(--radius);overflow:hidden;height:360px;
+    display:flex;align-items:flex-end;color:#fff;
+  }
+  .demo-card>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+  .demo-card:hover>img{transform:scale(1.04)}
+  .demo-card .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,23,23,.05) 35%,rgba(23,23,23,.82))}
+  .badge{
+    position:absolute;top:14px;left:14px;z-index:2;font-size:10.5px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:999px;
+    background:rgba(255,255,255,.92);color:var(--ink);
+  }
+  .badge.real{background:var(--cyan);color:var(--ink)}
+  .demo-card .info{position:relative;padding:20px;width:100%}
+  .demo-card .info h3{font-size:19px;font-weight:800}
+  .demo-card .info p{font-size:12.5px;opacity:.8;margin-top:2px}
+  .demo-card .info .go{
+    display:inline-block;margin-top:12px;font-size:12.5px;font-weight:600;
+    background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);
+    padding:7px 12px;border-radius:8px;backdrop-filter:blur(4px);
+  }
+  .demo-card .info .go:hover{background:rgba(255,255,255,.3)}
+  .demo-card .info .start{
+    display:inline-block;margin-top:12px;margin-left:6px;font-size:12.5px;font-weight:700;
+    background:var(--blue);padding:7px 12px;border-radius:8px;
+  }
+  .demo-card .info .start:hover{background:var(--blue-deep)}
+  .demo-note{margin-top:20px;font-size:14px;color:var(--ink-faint)}
+
+  /* steps with minutes */
+  .steps{background:var(--cloud)}
+  .steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  .step{background:#fff;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);position:relative}
+  .step img{height:200px;width:100%;object-fit:cover}
+  .step .body{padding:24px}
+  .step .num{
+    font-size:12px;font-weight:700;color:var(--blue);letter-spacing:.06em;text-transform:uppercase;
+  }
+  .step h3{font-size:20px;font-weight:800;margin-top:8px}
+  .step p{font-size:15px;color:var(--ink-soft);margin-top:8px}
+  .steps-cta{text-align:center;margin-top:44px}
+
+  /* features */
+  .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  .feat{border:1px solid var(--line);border-radius:var(--radius);padding:28px;background:#fff;transition:box-shadow .2s ease,transform .2s ease}
+  .feat:hover{box-shadow:0 20px 40px -20px rgba(23,23,23,.18);transform:translateY(-2px)}
+  .feat .ico{width:42px;height:42px;border-radius:10px;background:var(--cloud);display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:18px}
+  .feat h3{font-size:17px;font-weight:700}
+  .feat p{font-size:14.5px;color:var(--ink-soft);margin-top:8px}
+  .quote{grid-column:1/-1;background:var(--ink);color:#fff;border-radius:var(--radius);padding:40px 44px;display:flex;flex-direction:column;gap:10px}
+  .quote blockquote{font-size:clamp(20px,2.6vw,26px);font-weight:700;letter-spacing:-.01em;line-height:1.25}
+  .quote figcaption{font-size:14px;opacity:.6}
+
+  /* fees */
+  .fees{background:var(--ink);color:#fff}
+  .fees .label{color:var(--cyan)}
+  .fees .sub{color:rgba(255,255,255,.7)}
+  .fee-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+  .calc{background:#fff;color:var(--ink);border-radius:20px;padding:32px;box-shadow:0 40px 80px -40px rgba(0,0,0,.6)}
+  .calc .calc-label{font-size:13px;font-weight:600;color:var(--ink-soft)}
+  .calc .amount{font-size:clamp(34px,4vw,44px);font-weight:800;letter-spacing:-.02em;margin-top:4px}
+  .calc .amount small{font-size:16px;font-weight:600;color:var(--ink-faint)}
+  input[type=range]{
+    width:100%;margin:22px 0 8px;-webkit-appearance:none;height:6px;border-radius:3px;
+    background:linear-gradient(90deg,var(--blue) var(--fill,20%),#e8eaf1 var(--fill,20%));outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;
+    border:3px solid var(--blue);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);
+  }
+  .plan-tabs{display:flex;gap:8px;margin:20px 0 4px}
+  .plan-tab{
+    flex:1;padding:10px 6px;border-radius:9px;border:1px solid var(--line);background:#fff;
+    font-size:12.5px;font-weight:600;cursor:pointer;text-align:center;color:var(--ink-soft);font-family:inherit;
+  }
+  .plan-tab .pct{display:block;font-size:15px;color:var(--ink);font-weight:700;margin-top:2px}
+  .plan-tab.active{border-color:var(--blue);background:#eef1f9;color:var(--blue)}
+  .plan-tab.active .pct{color:var(--blue)}
+  .calc-results{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
+  .res{border-radius:12px;padding:18px;border:1px solid var(--line)}
+  .res .t{font-size:12px;font-weight:600;color:var(--ink-faint)}
+  .res .v{font-size:26px;font-weight:800;margin-top:4px;letter-spacing:-.02em}
+  .res.bad .v{color:#b3423f}
+  .res.good{background:#eef9f4;border-color:#cdeede}
+  .res.good .v{color:#177a52}
+  .calc-year{margin-top:16px;font-size:14px;color:var(--ink-soft)}
+  .calc-year b{color:var(--ink)}
+  .honesty{margin-top:28px;font-size:13.5px;line-height:1.6;color:rgba(255,255,255,.55);border-left:2px solid var(--cyan);padding-left:16px;max-width:520px}
+  .fee-points{display:flex;flex-direction:column;gap:22px;margin-top:36px}
+  .fee-point h3{font-size:17px;font-weight:700}
+  .fee-point p{font-size:14.5px;color:rgba(255,255,255,.65);margin-top:6px;max-width:460px}
+
+  /* ownership */
+  .own{background:var(--cloud)}
+  .own-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  .own-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:28px}
+  .own-card h3{font-size:17px;font-weight:700}
+  .own-card p{font-size:14.5px;color:var(--ink-soft);margin-top:8px}
+
+  /* pricing */
+  .price-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;align-items:stretch}
+  .plan{border:1px solid var(--line);border-radius:var(--radius);padding:28px;display:flex;flex-direction:column;background:#fff}
+  .plan.featured{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 30px 60px -30px rgba(70,100,175,.55)}
+  .plan .name{font-size:14px;font-weight:700}
+  .plan .for{font-size:12.5px;color:var(--ink-faint);margin-top:2px}
+  .plan.featured .for{color:rgba(255,255,255,.7)}
+  .plan .price{font-size:38px;font-weight:800;letter-spacing:-.02em;margin:16px 0 2px}
+  .plan .per{font-size:12.5px;color:var(--ink-faint)}
+  .plan.featured .per{color:rgba(255,255,255,.7)}
+  .plan ul{list-style:none;margin:20px 0 24px;display:flex;flex-direction:column;gap:9px;flex:1}
+  .plan li{font-size:13.5px;color:var(--ink-soft);padding-left:20px;position:relative}
+  .plan.featured li{color:rgba(255,255,255,.9)}
+  .plan li::before{content:"✓";position:absolute;left:0;color:var(--blue);font-weight:700}
+  .plan.featured li::before{color:var(--cyan)}
+  .plan li.soon{color:var(--ink-faint)}
+  .plan.featured li.soon{color:rgba(255,255,255,.55)}
+  .plan li.soon::before{content:"◷";color:inherit}
+  .soon-head{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-top:6px;color:var(--ink-faint)}
+  .plan.featured .soon-head{color:rgba(255,255,255,.55)}
+  .price-note{margin-top:28px;font-size:14px;color:var(--ink-soft);text-align:center}
+  .price-note a{color:var(--blue);font-weight:600}
+  .zero-band{
+    margin-bottom:36px;background:var(--cloud);border:1px solid var(--line);border-radius:12px;
+    padding:16px 22px;font-size:14.5px;font-weight:600;text-align:center;
+  }
+  .zero-band b{color:var(--blue)}
+
+  /* faq */
+  .faq{background:var(--cloud)}
+  .faq-list{max-width:760px}
+  details{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden}
+  summary{padding:20px 24px;font-size:16px;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";font-size:22px;font-weight:400;color:var(--blue);transition:transform .2s}
+  details[open] summary::after{transform:rotate(45deg)}
+  details .a{padding:0 24px 22px;font-size:15px;color:var(--ink-soft);line-height:1.6;max-width:640px}
+
+  /* cta */
+  .cta{background:#fff}
+  .cta-box{background:var(--ink);border-radius:24px;padding:72px 40px;text-align:center;color:#fff;position:relative;overflow:hidden}
+  .cta-box::after{
+    content:"";position:absolute;width:480px;height:480px;border-radius:50%;
+    background:radial-gradient(circle,rgba(70,100,175,.5),transparent 65%);
+    top:-240px;right:-140px;pointer-events:none;
+  }
+  .cta-box h2{font-size:clamp(32px,5vw,52px)}
+  .cta-box p{margin:16px auto 30px;color:rgba(255,255,255,.65);max-width:460px;font-size:16px}
+  .cta-box .friction{color:rgba(255,255,255,.45)}
+
+  footer{border-top:1px solid var(--line);padding:40px 0;background:#fff}
+  .foot{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+  .foot img{height:22px;opacity:.9}
+  .foot .links{display:flex;gap:24px;font-size:13.5px;color:var(--ink-soft)}
+  .foot .tiny{font-size:12.5px;color:var(--ink-faint)}
+
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  @media(max-width:940px){
+    .hero-grid{grid-template-columns:1fr;padding:52px 0 44px}
+    .hero-stage{height:400px}
+    .float-fee{left:12px}
+    .float-order{right:12px}
+    .stats-grid{grid-template-columns:repeat(2,1fr)}
+    .stat{border-left:none;border-top:1px solid var(--line)}
+    .demo-grid{grid-template-columns:1fr 1fr}
+    .steps-grid,.feat-grid,.own-grid{grid-template-columns:1fr}
+    .price-grid{grid-template-columns:1fr 1fr}
+    .fee-grid{grid-template-columns:1fr}
+    .nav-links{display:none}
+    section{padding:64px 0}
+  }
+  @media(max-width:560px){.price-grid,.demo-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-inner">
+    <a class="nav-logo" href="#"><img src="data:image/png;base64,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" alt="Niblr"></a>
+    <div class="nav-links">
+      <a href="#stores">Stores like yours</a>
+      <a href="#how">How it works</a>
+      <a href="#fees">Fees</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <a class="btn btn-primary btn-sm" href="#pricing">Open your store</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <h1>Open your store.<br><span class="accent">Tonight.</span></h1>
+      <p class="sub">From idea to first order in under 10 minutes — and you keep every sale. Customers pay straight into your account. Niblr takes 0%.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-blue" href="#pricing">Open your store</a>
+        <a class="btn btn-ghost" href="#stores">See stores like yours</a>
+      </div>
+      <p class="friction"><b>Free to start</b> · No card required · Leave anytime</p>
+      <div class="sector-tabs" id="sectorTabs"></div>
+      <p class="sector-hint">Pick your kind of shop — the preview follows you.</p>
+    </div>
+    <div class="hero-photo">
+      <div class="hero-stage" id="heroStage"></div>
+      <div class="float-card float-fee">
+        <div class="big">0%</div>
+        <div class="small">platform fee, on every plan</div>
+      </div>
+      <div class="float-card float-order">
+        <div class="dot"></div>
+        <div>
+          <div class="small" id="orderLine">New order · Sourdough box · AED 84</div>
+          <div class="tiny">paid directly to your account</div>
+        </div>
+      </div>
+      <div class="store-chip" id="storeChip"></div>
+    </div>
+  </div>
+  <div class="ticker">
+    <div class="wrap ticker-inner">
+      <div class="ticker-track" id="ticker">
+        <span><b>Cards</b> · your own gateway, your own keys</span>
+        <span><b>Cash on delivery</b> built in</span>
+        <span><b>Bank transfer</b> built in</span>
+        <span><b>UPI</b> for stores in India</span>
+        <span>Money settles <b>directly to you</b> — never through us</span>
+      </div>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="wrap stats-grid">
+      <div class="stat"><div class="v"><em>0%</em></div><div class="t">platform fee, every plan</div></div>
+      <div class="stat"><div class="v">7</div><div class="t">payment rails, your keys</div></div>
+      <div class="stat"><div class="v">23</div><div class="t">storefront blocks</div></div>
+      <div class="stat"><div class="v">2</div><div class="t">full themes, shipped</div></div>
+      <div class="stat"><div class="v">&lt;10<span style="font-size:.55em;font-weight:700"> min</span></div><div class="t">from idea to live store</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- STORES LIKE YOURS -->
+<section id="stores">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="label">Stores like yours</div>
+      <h2>See yourself in one of these.</h2>
+      <p class="sub">SD Bakery is a real shop taking real orders. The demo stores are fully working — browse them, add to cart, poke around. When one feels like yours, start from its look.</p>
+    </div>
+    <div class="demo-grid">
+      <div class="demo-card reveal">
+        <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=700&q=80" alt="Sourdough loaves at SD Bakery"
+             onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22700%22 height=%22800%22><rect fill=%22%23bfa78a%22 width=%22700%22 height=%22800%22/></svg>'">
+        <div class="shade"></div>
+        <span class="badge real">Real store</span>
+        <div class="info">
+          <h3>SD Bakery</h3>
+          <p>Bakery · Dubai Hills Estate</p>
+          <a class="go" href="https://sdbakery.ae" target="_blank" rel="noopener">Browse it live →</a>
+        </div>
+      </div>
+      <div class="demo-card reveal">
+        <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=700&q=80" alt="Boutique clothing racks"
+             onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22700%22 height=%22800%22><rect fill=%22%23d7dbe4%22 width=%22700%22 height=%22800%22/></svg>'">
+        <div class="shade"></div>
+        <span class="badge">Demo store</span>
+        <div class="info">
+          <h3>Thread &amp; Tide</h3>
+          <p>Fashion &amp; boutique</p>
+          <a class="go" href="#">Browse the demo →</a>
+          <a class="start" href="#pricing">Start from this look</a>
+        </div>
+      </div>
+      <div class="demo-card reveal">
+        <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=700&q=80" alt="Handmade rings"
+             onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22700%22 height=%22800%22><rect fill=%22%23cfc8bd%22 width=%22700%22 height=%22800%22/></svg>'">
+        <div class="shade"></div>
+        <span class="badge">Demo store</span>
+        <div class="info">
+          <h3>Second Silver</h3>
+          <p>Jewellery &amp; accessories</p>
+          <a class="go" href="#">Browse the demo →</a>
+          <a class="start" href="#pricing">Start from this look</a>
+        </div>
+      </div>
+      <div class="demo-card reveal">
+        <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=700&q=80" alt="Skincare products"
+             onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22700%22 height=%22800%22><rect fill=%22%23e3d5d0%22 width=%22700%22 height=%22800%22/></svg>'">
+        <div class="shade"></div>
+        <span class="badge">Demo store</span>
+        <div class="info">
+          <h3>Glow Theory</h3>
+          <p>Beauty &amp; skincare</p>
+          <a class="go" href="#">Browse the demo →</a>
+          <a class="start" href="#pricing">Start from this look</a>
+        </div>
+      </div>
+    </div>
+    <p class="demo-note reveal">Every store above runs on the same Niblr — same blocks, same admin, same 0%. SD Cookies runs on it too.</p>
+  </div>
+</section>
+
+<!-- STEPS -->
+<section class="steps" id="how">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="label">How it works</div>
+      <h2>Ten minutes, three steps, first order.</h2>
+      <p class="sub">No developer, no theme code, no app store to assemble. The clock below is real — it's how merchants actually launch.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step reveal">
+        <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=800&q=80" alt="Choosing a look for the store"
+             onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22500%22><rect fill=%22%23d7dbe4%22 width=%22800%22 height=%22500%22/></svg>'">
+        <div class="body">
+          <div class="num">Minutes 0–3</div>
+          <h3>Pick a look</h3>
+          <p>Start from a theme or a demo store you liked. 23 ready-made blocks, live preview, change anything yourself.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <img src="https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?auto=format&fit=crop&w=800&q=80" alt="Products ready to photograph and list"
+             onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22500%22><rect fill=%22%23cfc8bd%22 width=%22800%22 height=%22500%22/></svg>'">
+        <div class="body">
+          <div class="num">Minutes 3–7</div>
+          <h3>Add what you sell</h3>
+          <p>Products, photos, prices. Delivery zones, pickup windows and cutoff times if you fulfil locally.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=800&q=80" alt="Taking the first payment"
+             onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22500%22><rect fill=%22%23c3cadb%22 width=%22800%22 height=%22500%22/></svg>'">
+        <div class="body">
+          <div class="num">Minutes 7–10</div>
+          <h3>Take your first order</h3>
+          <p>Connect your gateway with your own keys — or go live today with cash on delivery and bank transfer.</p>
+        </div>
+      </div>
+    </div>
+    <div class="steps-cta reveal">
+      <a class="btn btn-blue" href="#pricing">Open your store</a>
+      <p class="friction"><b>Free to start</b> · No card required</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="label">What you get</div>
+      <h2>The daily work gets lighter.</h2>
+      <p class="sub">Everything below is built and shipping today — not a roadmap, not an app you buy separately.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat reveal">
+        <div class="ico">🏷️</div>
+        <h3>Run a sale without a plugin</h3>
+        <p>Discount codes — percentage or fixed, minimum order, usage limits, scheduled start and end. Ramadan sale, set once, done.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="ico">🧾</div>
+        <h3>Invoices your accountant accepts</h3>
+        <p>Sequentially numbered per store, generated as PDF, emailed with every order. The receipt an auditor asks for, without a second tool.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="ico">🛵</div>
+        <h3>Pickup and delivery, scheduled</h3>
+        <p>Delivery zones with their own fees, pickup windows, order cutoffs, lead days, your timezone. Click-and-collect works out of the box.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="ico">✉️</div>
+        <h3>Email your customers</h3>
+        <p>Segment your list, compose a campaign, send in batches with unsubscribe handled. Your customer list stays in your database — it's yours.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="ico">🌐</div>
+        <h3>Your own web address</h3>
+        <p>Launch on a free subdomain today, attach your own domain when you're ready. Nothing to migrate later.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="ico">💬</div>
+        <h3>Run your store by chatting to it</h3>
+        <p>Connect Claude or any AI assistant. Ask about orders on any plan; create products and edit pages by chat on Growth.</p>
+      </div>
+      <figure class="quote reveal">
+        <blockquote>“I should not need a developer to change a banner.”</blockquote>
+        <figcaption>Every shop owner, eventually. On Niblr, you change it yourself with live preview.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- FEES -->
+<section class="fees" id="fees">
+  <div class="wrap">
+    <div class="fee-grid">
+      <div class="reveal">
+        <div class="label">The fee you stop paying</div>
+        <h2>Shopify charges you extra for using your own gateway.<br>We charge nothing.</h2>
+        <p class="sub">In the UAE and India, Shopify Payments isn't offered — a local gateway is your only option, and Shopify adds a fee on every sale for using one. On Niblr, that fee is zero.</p>
+        <div class="fee-points">
+          <div class="fee-point">
+            <h3>0% platform fee, every plan</h3>
+            <p>We never take a cut of your sales. Our only revenue is the flat subscription — which means our only job is being worth it every month.</p>
+          </div>
+          <div class="fee-point">
+            <h3>Your gateway, your rate, your win</h3>
+            <p>Negotiate a better rate as you grow, or switch to a cheaper rail like UPI — you keep 100% of the improvement. Nobody sits in the middle.</p>
+          </div>
+        </div>
+        <p class="honesty">The honest part: you still pay your own gateway's processing rate on any platform — that's their fee for moving money. What disappears on Niblr is everything layered on top: no platform cut, and no penalty for choosing your own gateway.</p>
+      </div>
+      <div class="calc reveal">
+        <div class="calc-label">Your monthly sales</div>
+        <div class="amount">AED <span id="salesVal">25,000</span><small> / month</small></div>
+        <input type="range" id="sales" min="5000" max="300000" step="5000" value="25000">
+        <div class="calc-label" style="margin-top:14px">On Shopify, your plan would be</div>
+        <div class="plan-tabs" id="planTabs">
+          <button class="plan-tab active" data-rate="0.02">Basic<span class="pct">2%</span></button>
+          <button class="plan-tab" data-rate="0.01">Grow<span class="pct">1%</span></button>
+          <button class="plan-tab" data-rate="0.006">Advanced<span class="pct">0.6%</span></button>
+        </div>
+        <div class="calc-results">
+          <div class="res bad">
+            <div class="t">Shopify's gateway penalty</div>
+            <div class="v">AED <span id="shopifyFee">500</span><small style="font-size:13px;color:var(--ink-faint)">/mo</small></div>
+          </div>
+          <div class="res good">
+            <div class="t">Niblr's gateway penalty</div>
+            <div class="v">AED 0</div>
+          </div>
+        </div>
+        <p class="calc-year">That's <b>AED <span id="yearFee">6,000</span> a year</b> that stays in your business.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OWNERSHIP -->
+<section class="own">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="label">No traps</div>
+      <h2>Your way out is built in.</h2>
+      <p class="sub">The reason to stay is that you can leave. Nothing about your business is held hostage — which is exactly why merchants trust the platform with it.</p>
+    </div>
+    <div class="own-grid">
+      <div class="own-card reveal">
+        <h3>Everything exports</h3>
+        <p>Catalog, orders and customers export to standard formats whenever you want — on every plan, including Free.</p>
+      </div>
+      <div class="own-card reveal">
+        <h3>MIT-licensed code</h3>
+        <p>The licence is the promise that matters: nobody can revoke it, reprice it, or make leaving expensive. Self-host the single-store build free, forever.</p>
+      </div>
+      <div class="own-card reveal">
+        <h3>If we vanished tomorrow</h3>
+        <p>Your store keeps running. Your data lives in standard Postgres and S3, and the hosted product is the same code you can deploy yourself.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="label">Pricing</div>
+      <h2>A flat fee. Never a cut of your sales.</h2>
+    </div>
+    <div class="zero-band reveal"><b>0% platform transaction fee on every plan</b> — including Free. That's the whole point.</div>
+    <div class="price-grid">
+      <div class="plan reveal">
+        <div class="name">Free</div>
+        <div class="for">Try everything, properly</div>
+        <div class="price">$0</div>
+        <div class="per">a real store while you decide · up to 50 orders/mo</div>
+        <ul>
+          <li>Full storefront on a subdomain</li>
+          <li>Cash on delivery &amp; bank transfer</li>
+          <li>Export your data anytime</li>
+        </ul>
+        <a class="btn btn-ghost" href="#">Open your store free</a>
+      </div>
+      <div class="plan reveal">
+        <div class="name">Starter</div>
+        <div class="for">Your shop, online</div>
+        <div class="price">$19</div>
+        <div class="per">per month</div>
+        <ul>
+          <li>Your own domain</li>
+          <li>Connect any payment gateway</li>
+          <li>Discounts, invoices, pickup &amp; delivery</li>
+          <li>Email campaigns</li>
+        </ul>
+        <a class="btn btn-ghost" href="#">Choose Starter</a>
+      </div>
+      <div class="plan featured reveal">
+        <div class="name">Growth</div>
+        <div class="for">Look sharper. Work faster.</div>
+        <div class="price">$59</div>
+        <div class="per">per month</div>
+        <ul>
+          <li>Everything in Starter</li>
+          <li>Premium blocks &amp; layout variants</li>
+          <li>Edit your store by chatting to AI</li>
+          <li>Priority support</li>
+          <div class="soon-head">In build — yours at this price when they land</div>
+          <li class="soon">Analytics dashboard</li>
+          <li class="soon">Multi-currency · gift cards · B2B price lists</li>
+        </ul>
+        <a class="btn" style="background:#fff;color:var(--blue)" href="#">Choose Growth</a>
+      </div>
+      <div class="plan reveal">
+        <div class="name">Agency</div>
+        <div class="for">Run stores for clients</div>
+        <div class="price">$249</div>
+        <div class="per">per month</div>
+        <ul>
+          <li>Multiple stores, one dashboard</li>
+          <li>Isolated data per store</li>
+          <li>Everything in Growth, per store</li>
+        </ul>
+        <a class="btn btn-ghost" href="#">Talk to us</a>
+      </div>
+    </div>
+    <p class="price-note reveal">Want to run it yourself? The single-store build is MIT-licensed and free to self-host, forever. <a href="#faq">Self-host &amp; enterprise →</a></p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="label">Before you start</div>
+      <h2>The questions that matter.</h2>
+    </div>
+    <div class="faq-list reveal">
+      <details open>
+        <summary>Do I need to know how to code?</summary>
+        <div class="a">No. You compose your store from ready-made blocks with live preview, and change anything — banner, products, pages — yourself. If you can use Instagram, you can run a Niblr store.</div>
+      </details>
+      <details>
+        <summary>Can I really launch in ten minutes?</summary>
+        <div class="a">Yes, if you have your products and photos ready — look, catalog, first order. Most people spend longer choosing what to name the store than building it. Take your time if you want to; the point is that nothing technical is standing between you and being open.</div>
+      </details>
+      <details>
+        <summary>Where does my money go?</summary>
+        <div class="a">Straight into your account. You connect your payment gateway with your own keys, and customers pay you directly — Niblr is never in the payment flow and never holds your money. Your keys are encrypted at rest and used only to talk to your processor.</div>
+      </details>
+      <details>
+        <summary>So Niblr doesn't reduce my card processing fees?</summary>
+        <div class="a">Correct, and we won't pretend otherwise. Your gateway sets that rate and bills you directly. What changes on Niblr is everything layered on top: no platform cut of your sales, and no extra fee for choosing your own gateway — the fee Shopify charges in markets like the UAE and India.</div>
+      </details>
+      <details>
+        <summary>Can I use my own web address?</summary>
+        <div class="a">Yes. Launch on a free subdomain today and attach your own domain whenever you're ready — no migration, no downtime.</div>
+      </details>
+      <details>
+        <summary>Can I move away later?</summary>
+        <div class="a">Anytime. Your catalog, orders and customers export in standard formats on every plan, and the code is MIT-licensed so you can self-host the same store yourself. Leaving being easy is the reason staying feels safe.</div>
+      </details>
+      <details>
+        <summary>What happens to my store if Niblr shuts down?</summary>
+        <div class="a">It keeps running. The code is MIT-licensed, your data exports in standard formats, and the hosted version is the same codebase you can deploy yourself. This is the entire reason the architecture looks the way it does.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="wrap">
+    <div class="cta-box reveal">
+      <h2>Still reading?<br>You could be open by now.</h2>
+      <p>Ten minutes from here to your first product page. The first order feels as good as everyone says.</p>
+      <a class="btn btn-blue" href="#pricing">Open your store</a>
+      <p class="friction">Free to start · No card required · Leave anytime</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <img src="data:image/png;base64,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" alt="Niblr">
+    <div class="links">
+      <a href="#stores">Stores like yours</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://sdbakery.ae" target="_blank" rel="noopener">SD Bakery</a>
+    </div>
+    <div class="tiny">© 2026 Niblr · Commerce you own.</div>
+  </div>
+</footer>
+
+<script>
+  // ---------- sector switcher ----------
+  const SECTORS = [
+    {
+      key:'bakery', tabLabel:'🥐 Bakery',
+      img:'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1000&q=80',
+      store:'SD Bakery', tag:'<span class="real">● Real store</span> · Dubai Hills Estate',
+      link:'https://sdbakery.ae', linkText:'Browse it live →',
+      order:'New order · Sourdough box · AED 84'
+    },
+    {
+      key:'boutique', tabLabel:'👗 Boutique',
+      img:'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1000&q=80',
+      store:'Thread & Tide', tag:'Demo store · Fashion & boutique',
+      link:'#stores', linkText:'Browse the demo →',
+      order:'New order · Linen shirt · AED 220'
+    },
+    {
+      key:'jewellery', tabLabel:'💍 Jewellery',
+      img:'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=1000&q=80',
+      store:'Second Silver', tag:'Demo store · Jewellery & accessories',
+      link:'#stores', linkText:'Browse the demo →',
+      order:'New order · Stacking rings · AED 450'
+    },
+    {
+      key:'beauty', tabLabel:'🧴 Beauty',
+      img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1000&q=80',
+      store:'Glow Theory', tag:'Demo store · Beauty & skincare',
+      link:'#stores', linkText:'Browse the demo →',
+      order:'New order · Serum duo · AED 165'
+    }
+  ];
+  const stage = document.getElementById('heroStage');
+  const tabsWrap = document.getElementById('sectorTabs');
+  const orderLine = document.getElementById('orderLine');
+  const storeChip = document.getElementById('storeChip');
+  const FALLBACK = 'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22><rect fill=%22%23dfe3ec%22 width=%22800%22 height=%22600%22/></svg>';
+
+  SECTORS.forEach((s, i) => {
+    const im = document.createElement('img');
+    im.src = s.img; im.alt = s.store;
+    im.onerror = function(){ this.onerror = null; this.src = FALLBACK; };
+    if (i === 0) im.classList.add('show');
+    stage.appendChild(im);
+
+    const b = document.createElement('button');
+    b.className = 'sector-tab' + (i === 0 ? ' active' : '');
+    b.textContent = s.tabLabel;
+    b.addEventListener('click', () => setSector(i));
+    tabsWrap.appendChild(b);
+  });
+
+  function setSector(i){
+    const s = SECTORS[i];
+    tabsWrap.querySelectorAll('.sector-tab').forEach((t, j) => t.classList.toggle('active', j === i));
+    stage.querySelectorAll('img').forEach((im, j) => im.classList.toggle('show', j === i));
+    orderLine.textContent = s.order;
+    storeChip.innerHTML = '<div class="name">' + s.store + '</div><div class="tag">' + s.tag + '</div><a href="' + s.link + '"' + (s.link.startsWith('http') ? ' target="_blank" rel="noopener"' : '') + '>' + s.linkText + '</a>';
+  }
+  setSector(0);
+
+  // auto-rotate until the user interacts
+  let idx = 0, auto = setInterval(() => { idx = (idx + 1) % SECTORS.length; setSector(idx); }, 5000);
+  tabsWrap.addEventListener('click', () => clearInterval(auto));
+
+  // ---------- calculator ----------
+  const sales = document.getElementById('sales');
+  const salesVal = document.getElementById('salesVal');
+  const shopifyFee = document.getElementById('shopifyFee');
+  const yearFee = document.getElementById('yearFee');
+  const tabs = document.querySelectorAll('.plan-tab');
+  let rate = 0.02;
+  function fmt(n){return Math.round(n).toLocaleString('en-US')}
+  function update(){
+    const s = +sales.value;
+    salesVal.textContent = fmt(s);
+    const fee = s * rate;
+    shopifyFee.textContent = fmt(fee);
+    yearFee.textContent = fmt(fee*12);
+    const pct = ((s - sales.min) / (sales.max - sales.min)) * 100;
+    sales.style.setProperty('--fill', pct + '%');
+  }
+  sales.addEventListener('input', update);
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    rate = +t.dataset.rate;
+    update();
+  }));
+  update();
+
+  // ---------- ticker ----------
+  const track = document.getElementById('ticker');
+  track.innerHTML += track.innerHTML;
+
+  // ---------- reveal ----------
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}
+  }), {threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Niblr admin skin floor
+
+   Token-level restyle of native (un-redesigned) Payload admin surfaces —
+   inputs, buttons, tables, cards, the list toolbar, and pagination — so
+   they read as Niblr without deep selector surgery on Payload's markup.
+
+   How this works: Payload's own stylesheets already consume a small set of
+   CSS custom properties for exactly these surfaces —
+     --style-radius-s / -m / -l   (@payloadcms/ui/dist/scss/app.scss)
+     --accessibility-outline      (focus-visible outline, read by
+                                    .btn, .pill, .paginator__page, …)
+   Redefining those tokens on :root is enough for the whole admin to pick
+   up the change in one place. If a future Payload version changes its
+   markup, these rules degrade gracefully back to Payload's own default
+   token values rather than breaking — this file never targets Payload's
+   internal DOM structure, only the tokens and a handful of stable,
+   long-standing class names (.btn, .table, .card, .pill, .search-bar,
+   .paginator__page).
+
+   This file builds on the --nb-* tokens from
+   src/components/admin/brand/admin-brand.css, which is already loaded on
+   every admin route (imported by AdminNavExtras.tsx / TenantNavLinks.tsx,
+   rendered via the AdminNav Nav override registered in payload.config.ts).
+   It intentionally does NOT redeclare or @import those tokens — it only
+   consumes them — so there is exactly one source of truth for the Niblr
+   palette and radius scale.
+
+   Theme safety: every rule below reads a --theme-* or --nb-* custom
+   property, never a literal hex. --nb-brand itself is a fixed, non-theme
+   hex by design (see admin-brand.css) — it is Niblr's identity color, not
+   a light/dark surface color — so using it directly is correct, not a
+   theme-safety violation. Dark is the production default and needs no
+   separate branch here because nothing below hardcodes a light/dark value.
+
+   Scoping: `html[data-platform-nav]` marks the platform super-admin apex
+   (set by AdminNavExtras.tsx — the operator's control tower over every
+   tenant, not one merchant's shop window). Structural, non-color polish
+   (radius, the focus-visible ring) is left global: it makes every admin
+   surface easier to use and never asserts a single tenant's identity, so
+   it is safe — even correct — on the platform view too. Rules that paint
+   a *color* opinion (brand-blue primary buttons, brand-tinted row/page
+   hover states, a brand-tinted search bar) are scoped to
+   `:root:not([data-platform-nav])` — tenant admin only — so the platform
+   console keeps reading as a neutral ops tool rather than picking up one
+   store's branding.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── Suppress Payload's native AppHeader ─────────────────────────────────
+   `admin.components.header` is ADDITIVE in Payload, not a replacement: our
+   bespoke AdminHeader (src/components/admin/shell/AdminHeader.tsx) renders
+   ABOVE Payload's own `<AppHeader>` (@payloadcms/ui elements/AppHeader),
+   which still renders on every admin page and ships its own StepNav
+   breadcrumb, an account/gravatar link, and (only under `small-break`,
+   i.e. mobile-only, class `.app-header__mobile-nav-toggler`) a nav
+   toggler. Left alone this doubles the breadcrumb and the account control
+   on every admin surface, tenant and platform apex alike — so this is
+   unscoped, unlike the brand-color rules below.
+
+   Hiding `.app-header` is safe for mobile nav access: the OS-level nav
+   toggle button lives in a *separate*, sibling element — `#nav-toggler`
+   inside `.template-default__nav-toggler-wrapper`
+   (@payloadcms/next templates/Default, rendered via `NavHamburger`) — that
+   sits outside `<AppHeader>` in the DOM and carries no display:none at any
+   breakpoint, so it keeps working once `.app-header` is hidden. Only
+   AppHeader's own *redundant* inline mobile toggler goes away with it.
+
+   Account + logout are already available from the nav user chip
+   (AdminNav.client.tsx). Losing Payload's document-level StepNav crumbs
+   here is an accepted Phase-0 deferral — our bespoke AdminHeader currently
+   renders a collection-level crumb only. */
+.app-header {
+  display: none;
+}
+
+/* ── Hide Payload's redundant desktop nav toggler ────────────────────────
+   `#nav-toggler` (`.template-default__nav-toggler-wrapper`, rendered via
+   `NavHamburger` in @payloadcms/next's `templates/Default`) is Payload's
+   own nav-open/collapse control — a `<` chevron. It lives outside
+   `<AppHeader>` (see the comment above), so hiding `.app-header` does not
+   remove it, and at desktop widths it now sits right next to our own
+   icon-rail collapse button (`.nb-shell-nav__collapse`, the ▤ toggle in
+   AdminNav.client.tsx) — two overlapping controls that both claim to
+   collapse/open the nav, which reads as a bug.
+
+   It has to stay working below the width where our bespoke nav becomes a
+   drawer, though: `.nb-shell-nav` switches to a fixed overlay toggled by
+   Payload's `navOpen` state at `@media (max-width: 900px)` (shell.css),
+   and `#nav-toggler` is the only remaining control that calls
+   `setNavOpen` at that width — `.app-header__mobile-nav-toggler`, the
+   *other* built-in toggler, went away along with the rest of
+   `<AppHeader>` above. So this only hides `#nav-toggler` strictly above
+   that breakpoint, mirroring shell.css's own boundary (900px = drawer,
+   901px+ = our rail owns collapse) rather than reusing one of Payload's
+   own breakpoints, none of which line up with our drawer: native
+   `.template-default .nav` itself only becomes an overlay below 1440px,
+   and — separately — Payload's *own* compiled CSS already hides this
+   toggler's icon (`.template-default__nav-toggler-wrapper .hamburger`)
+   below 768px in favor of AppHeader's mobile hamburger. That means real
+   phones (<768px) already lose this control's icon regardless of the
+   rule below; that's a pre-existing gap in Payload's own styles, not
+   something this rule introduces, and fixing it is out of scope here. */
+@media (min-width: 901px) {
+  #nav-toggler {
+    display: none;
+  }
+}
+
+/* ── Global tokens: geometry + focus ring (safe on every admin surface) ── */
+
+:root {
+  /* Every Payload surface that reads --style-radius-* (buttons, inputs,
+     tables, cards, pills, popups, pagination …) picks up Niblr's softer
+     radius scale for free. */
+  --style-radius-s: var(--nb-radius-s);
+  --style-radius-m: var(--nb-radius-m);
+  --style-radius-l: var(--nb-radius-l);
+
+  /* Payload's own a11y focus outline, retinted brand blue. Drives
+     :focus-visible on buttons, pills, and pagination — a clearer, more
+     intentional focus indicator benefits every admin view, platform
+     included. */
+  --accessibility-outline: 2px solid var(--nb-brand);
+}
+
+/* .pill's own base radius is compiled from a Sass variable, not the
+   --style-radius-s custom property (see @payloadcms/ui Pill/index.scss),
+   so the token swap above doesn't reach it — one explicit line closes
+   the gap without touching Pill's markup or its semantic color variants
+   (warning / success / error pills keep their own colors untouched). */
+.pill {
+  border-radius: var(--nb-radius-s);
+}
+
+/* Native .btn already reads --style-radius-s for its corners; nudge it to
+   the slightly rounder --nb-radius-btn used by the bespoke .nb-btn
+   primitive so native and bespoke buttons read as the same family. */
+.btn {
+  border-radius: var(--nb-radius-btn);
+}
+
+/* Text/number/email/textarea inputs use Payload's shared formInput mixin,
+   whose own :focus rule only swaps border-color (it sets `outline: 0`),
+   so the --accessibility-outline token above never reaches it. Give form
+   inputs — and the react-select control that stands in for <select> — a
+   matching brand focus ring directly. This is the "input focus ring"
+   polish: a clearer focus state helps every admin, so it stays global
+   rather than being tenant-scoped. */
+input:where(:not([type='checkbox']):not([type='radio'])):focus,
+textarea:focus {
+  border-color: var(--nb-brand);
+  box-shadow: 0 0 0 3px var(--nb-brand-soft);
+}
+
+.rs__control--is-focused {
+  border-color: var(--nb-brand);
+  box-shadow: 0 0 0 3px var(--nb-brand-soft);
+}
+
+/* ── Tenant admin only: brand-colored surfaces ──────────────────────────
+   Everything in this block only fires when html does NOT carry
+   [data-platform-nav] — i.e. never on the platform super-admin apex. */
+
+:root:not([data-platform-nav]) {
+  /* Primary action button (Save, Create new, Publish …). Payload's own
+     .btn--style-primary already exposes --bg-color / --color / --hover-bg
+     / --hover-color as the retint surface (see
+     @payloadcms/ui elements/Button/index.scss) — set those instead of
+     re-authoring the button. */
+  .btn--style-primary:not(.btn--disabled) {
+    --bg-color: var(--nb-brand);
+    --color: var(--nb-brand-contrast);
+    --hover-bg: var(--nb-brand-strong);
+    --hover-color: var(--nb-brand-contrast);
+  }
+
+  /* Table: a brand-tinted row hover reads as an intentional, clickable
+     surface instead of Payload's default neutral hover. */
+  .table tbody tr:hover td {
+    background: var(--nb-brand-soft);
+  }
+
+  /* Cards on the collection dashboard / list views. */
+  .card--has-onclick:hover {
+    border-color: var(--nb-brand);
+  }
+
+  /* List toolbar: brand-tinted focus state on the search bar. */
+  .search-bar:focus-within {
+    box-shadow: 0 0 0 2px var(--nb-brand);
+  }
+
+  /* Pagination: current page reads as an active brand state rather than
+     a flat neutral fill. */
+  .paginator__page--is-current {
+    background: var(--nb-brand-soft);
+    color: var(--nb-brand);
+  }
+}

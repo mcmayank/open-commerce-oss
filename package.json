@@ -1,0 +1,82 @@
+{
+  "name": "niblr",
+  "version": "1.0.0",
+  "description": "Open-source single-store commerce on Next.js and Payload. 0% platform fee, bring your own gateway.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "S3_BUCKET=${S3_BUCKET:-generation-placeholder} cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap && cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build --webpack",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev --webpack",
+    "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev --webpack",
+    "generate:importmap": "S3_BUCKET=${S3_BUCKET:-generation-placeholder} cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "migrate:create": "S3_BUCKET=${S3_BUCKET:-generation-placeholder} cross-env NODE_OPTIONS=--no-deprecation payload migrate:create",
+    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "lint": "cross-env NODE_OPTIONS=--no-deprecation eslint .",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "audit:media": "cross-env NODE_OPTIONS=--no-deprecation payload run ./scripts/audit-media-objects.ts",
+    "test": "vitest run",
+    "test:component": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" playwright test --config=playwright.component.config.ts",
+    "email:dev": "email dev --dir src/emails --port 3001"
+  },
+  "dependencies": {
+    "@next/third-parties": "^16.2.10",
+    "@payloadcms/db-postgres": "3.86.0",
+    "@payloadcms/email-resend": "3.86.0",
+    "@payloadcms/next": "3.86.0",
+    "@payloadcms/plugin-mcp": "3.86.0",
+    "@payloadcms/plugin-multi-tenant": "^3.86.0",
+    "@payloadcms/richtext-lexical": "3.86.0",
+    "@payloadcms/storage-s3": "3.86.0",
+    "@payloadcms/ui": "3.86.0",
+    "@react-email/components": "^1.0.12",
+    "@react-email/render": "^2.1.0",
+    "@react-pdf/renderer": "^4.5.1",
+    "@tailwindcss/postcss": "^4.3.2",
+    "cross-env": "^7.0.3",
+    "dotenv": "16.4.7",
+    "graphql": "^16.8.1",
+    "next": "16.2.6",
+    "payload": "3.86.0",
+    "postcss": "^8.5.16",
+    "razorpay": "^2.9.6",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "resend": "^6.17.1",
+    "sharp": "^0.34.5",
+    "tailwindcss": "^4.3.2"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.1095.0",
+    "@playwright/test": "1.58.2",
+    "@react-email/ui": "^6.7.0",
+    "@testing-library/react": "16.3.0",
+    "@types/node": "22.19.9",
+    "@types/picomatch": "^4.0.3",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "4.5.2",
+    "eslint": "^9.16.0",
+    "eslint-config-next": "16.2.6",
+    "jsdom": "28.0.0",
+    "picomatch": "^4.0.7",
+    "prettier": "^3.4.2",
+    "react-email": "^6.7.0",
+    "tsx": "4.22.4",
+    "typescript": "5.7.3",
+    "vite-tsconfig-paths": "6.0.5",
+    "vitest": "4.0.18"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0",
+    "pnpm": "^9 || ^10 || ^11"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp",
+      "esbuild",
+      "unrs-resolver"
+    ]
+  },
+  "private": false
+}
