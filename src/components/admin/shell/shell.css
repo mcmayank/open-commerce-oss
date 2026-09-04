@@ -1,0 +1,535 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Niblr admin — Phase 0 bespoke shell nav
+
+   Left rail replacing Payload's stock `.nav`. Built on `--nb-*` (brand) and
+   `--theme-*` (Payload light/dark scale) tokens only — no hardcoded colors,
+   so one definition reads correctly in both themes. Dark is the production
+   default. Mirrors the approved concept mockup (phase0-shell-mockup.html):
+   brand rail on the active item, a store chip above the groups, a collapsed
+   rail that keeps icons/avatars but hides labels, and brand-colored badges.
+
+   Class prefix: .nb-shell-nav  ·  requires src/components/admin/brand/admin-brand.css
+   for --nb-* tokens (imported transitively via AdminNavExtras/TenantNavLinks).
+   ───────────────────────────────────────────────────────────────────────── */
+
+.nb-shell-nav {
+  --nb-shell-w: 248px;
+  --nb-shell-w-collapsed: 68px;
+
+  width: var(--nb-shell-w);
+  min-width: var(--nb-shell-w);
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.875rem 0.75rem;
+  background: var(--theme-elevation-0, #fff);
+  border-right: 1px solid var(--theme-elevation-150, #e5e7eb);
+  box-sizing: border-box;
+  transition: width 160ms ease, min-width 160ms ease;
+}
+
+.nb-shell-nav.is-collapsed {
+  width: var(--nb-shell-w-collapsed);
+  min-width: var(--nb-shell-w-collapsed);
+  align-items: center;
+}
+
+/* ── Brand row ─────────────────────────────────────────────────────────── */
+
+.nb-shell-nav__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.25rem 0.375rem 0.75rem;
+  width: 100%;
+}
+
+.nb-shell-nav__brandmark {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: var(--nb-radius-s);
+  background: linear-gradient(150deg, var(--nb-brand), var(--nb-brand-strong));
+  color: var(--nb-brand-contrast);
+  display: grid;
+  place-items: center;
+  font-family: var(--nb-font-display);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.nb-shell-nav__wordmark {
+  font-family: var(--nb-font-display);
+  font-weight: 700;
+  font-size: 1.0625rem;
+  letter-spacing: -0.02em;
+  color: var(--theme-text);
+}
+
+.nb-shell-nav__collapse {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--theme-elevation-150, #e5e7eb);
+  border-radius: var(--nb-radius-s);
+  background: var(--theme-elevation-0, #fff);
+  color: var(--theme-elevation-500, #6b7280);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.nb-shell-nav__collapse:hover {
+  background: var(--theme-elevation-50, #f9fafb);
+  color: var(--theme-text);
+}
+
+.nb-shell-nav.is-collapsed .nb-shell-nav__wordmark {
+  display: none;
+}
+
+/* ── Store chip ────────────────────────────────────────────────────────── */
+
+.nb-shell-nav__store {
+  display: flex;
+  align-items: center;
+  gap: 0.5625rem;
+  padding: 0.5rem 0.625rem;
+  margin: 0 0.125rem 0.375rem;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--theme-elevation-150, #e5e7eb);
+  border-radius: var(--nb-radius-m);
+  background: var(--theme-elevation-50, #f9fafb);
+}
+
+.nb-shell-nav__store-avatar {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 7px;
+  background: var(--nb-brand-soft);
+  color: var(--nb-brand);
+  display: grid;
+  place-items: center;
+  font-family: var(--nb-font-display);
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.nb-shell-nav__store-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  min-width: 0;
+}
+
+.nb-shell-nav__store-name {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--theme-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nb-shell-nav__store-plan {
+  display: flex;
+  align-items: center;
+  gap: 0.3125rem;
+  font-size: 0.65625rem;
+  color: var(--theme-elevation-500, #6b7280);
+}
+
+.nb-shell-nav__store-dot,
+.nb-shell-nav__store-dot--danger {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.nb-shell-nav__store-dot {
+  background: var(--nb-signal);
+  box-shadow: 0 0 0 3px var(--nb-signal-soft);
+}
+
+/* Suspended store: reuse the same danger tokens as .nb-badge--danger
+   (admin-brand.css) — a suspended store's storefront is down
+   (StoreUnavailable / PlatformDashboard's danger tone), not the merchant's
+   own unpublished draft, so it must never read as the neutral "draft" state. */
+.nb-shell-nav__store-dot--danger {
+  background: var(--theme-error-600, #dc2626);
+  box-shadow: 0 0 0 3px var(--theme-error-100, #fee2e2);
+}
+
+.nb-shell-nav__store-status--danger {
+  color: var(--theme-error-600, #dc2626);
+  font-weight: 600;
+}
+
+.nb-shell-nav.is-collapsed .nb-shell-nav__store {
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.nb-shell-nav.is-collapsed .nb-shell-nav__store-meta {
+  display: none;
+}
+
+/* ── Scrollable group list ────────────────────────────────────────────── */
+
+.nb-shell-nav__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  width: 100%;
+}
+
+.nb-shell-nav__scroll::-webkit-scrollbar {
+  width: 0;
+}
+
+.nb-shell-nav__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  width: 100%;
+}
+
+.nb-shell-nav__group-label {
+  font-family: var(--nb-font-display);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--nb-nav-label, var(--theme-elevation-500));
+  padding: 0.75rem 0.625rem 0.3125rem;
+}
+
+.nb-shell-nav.is-collapsed .nb-shell-nav__group-label {
+  display: none;
+}
+
+/* ── Nav items ─────────────────────────────────────────────────────────── */
+
+.nb-shell-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 0.6875rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: var(--nb-radius-s);
+  color: var(--theme-elevation-500, #6b7280);
+  text-decoration: none;
+  font-size: 0.84375rem;
+  font-weight: 500;
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.nb-shell-nav__item:hover {
+  background: var(--theme-elevation-50, #f9fafb);
+  color: var(--theme-text);
+}
+
+.nb-shell-nav__item.is-active {
+  background: var(--nb-nav-active-bg, var(--nb-brand-soft));
+  color: var(--theme-text);
+  font-weight: 600;
+}
+
+/* Leading icon (NavIcon, AdminNav.client.tsx). `stroke="currentColor"` on
+   the SVG itself picks up this element's `color` — muted by default, full
+   `--theme-text` on hover/active — so the icon never needs its own color
+   rule. Sized/pinned so it never gets squashed by the label's flex-basis
+   or stretched by the item's line-height. */
+.nb-shell-nav__icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+/* Thin brand rail on the leading edge of the active item — the sole ornament,
+   matching the .nb-stat / .kpi convention in admin-brand.css. */
+.nb-shell-nav__item.is-active::before {
+  content: '';
+  position: absolute;
+  left: -0.375rem;
+  top: 0.375rem;
+  bottom: 0.375rem;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--nb-nav-active-rule, var(--nb-brand));
+}
+
+.nb-shell-nav__badge {
+  margin-left: auto;
+  font-family: var(--nb-font-display);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+  background: var(--nb-brand);
+  color: var(--nb-brand-contrast);
+  border-radius: 999px;
+  padding: 0.1875rem 0.4375rem;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* The item's own label is a bare text node (not wrapped in a child element) so
+   that Testing Library's getByText(..., {selector: 'a'}) — and the same DOM
+   shape any assistive tech / "find in page" walk relies on — resolves the link
+   itself, not a decorative wrapper. That rules out `display: none` on a label
+   element for the collapsed rail; `font-size: 0` hides the bare text run
+   instead, and the badge (a real element) is hidden separately, matching the
+   concept mockup's `.collapsed .nav-label, .badge-count { display: none }`. */
+.nb-shell-nav.is-collapsed .nb-shell-nav__item {
+  justify-content: center;
+  padding: 0.5625rem;
+  font-size: 0;
+  /* Zero the icon/label gap too: the label's text run is width:0 at
+     font-size:0, but flex `gap` still reserves space for it regardless of
+     content width, which would nudge the icon left of true-center inside
+     the centered flex group. With gap:0 the icon — the only thing left
+     with visible width once the badge is hidden below — sits dead-center,
+     and the active-item background/color (is-active, above) still fills
+     and tints the whole item box around it, so the active highlight reads
+     even with no label to color. */
+  gap: 0;
+}
+
+.nb-shell-nav.is-collapsed .nb-shell-nav__badge {
+  display: none;
+}
+
+/* ── User chip ─────────────────────────────────────────────────────────── */
+
+.nb-shell-nav__user {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  width: 100%;
+  padding-top: 0.5rem;
+  margin-top: 0.375rem;
+  border-top: 1px solid var(--theme-elevation-100, #f0f1f3);
+}
+
+.nb-shell-nav__user-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5625rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0.375rem;
+  border-radius: var(--nb-radius-s);
+  text-decoration: none;
+  color: inherit;
+  transition: background 120ms ease;
+}
+
+.nb-shell-nav__user-link:hover {
+  background: var(--theme-elevation-50, #f9fafb);
+}
+
+.nb-shell-nav__avatar {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--nb-brand);
+  color: var(--nb-brand-contrast);
+  display: grid;
+  place-items: center;
+  font-family: var(--nb-font-display);
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.nb-shell-nav__user-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  min-width: 0;
+}
+
+.nb-shell-nav__user-name {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--theme-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nb-shell-nav__user-role {
+  font-size: 0.65625rem;
+  color: var(--theme-elevation-500, #6b7280);
+}
+
+.nb-shell-nav__logout {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--nb-radius-s);
+  color: var(--theme-elevation-500, #6b7280);
+  text-decoration: none;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.nb-shell-nav__logout:hover {
+  background: var(--theme-elevation-50, #f9fafb);
+  color: var(--theme-text);
+}
+
+.nb-shell-nav.is-collapsed .nb-shell-nav__user {
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.nb-shell-nav.is-collapsed .nb-shell-nav__user-meta {
+  display: none;
+}
+
+.nb-shell-nav.is-collapsed .nb-shell-nav__user-link {
+  padding: 0.375rem 0;
+  justify-content: center;
+}
+
+/* ── Mobile drawer ─────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .nb-shell-nav {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 40;
+    transform: translateX(-100%);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+  }
+
+  .nb-shell-nav.is-open {
+    transform: translateX(0);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Niblr admin — Phase 0 bespoke shell header
+
+   Top bar: collection-level breadcrumb, ⌘K search trigger, notifications
+   trigger, theme toggle. Same token discipline as the nav above — `--nb-*`
+   and `--theme-*` only, dark is the production default.
+
+   Class prefix: .nb-shell-header
+   ───────────────────────────────────────────────────────────────────────── */
+
+.nb-shell-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--theme-elevation-0, #fff);
+  border-bottom: 1px solid var(--theme-elevation-150, #e5e7eb);
+  box-sizing: border-box;
+}
+
+.nb-shell-header__crumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.nb-shell-header__crumb {
+  font-family: var(--nb-font-display, inherit);
+  font-size: 0.9375rem;
+  color: var(--theme-elevation-500, #6b7280);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nb-shell-header__crumb--current {
+  color: var(--theme-text);
+  font-weight: 600;
+}
+
+.nb-shell-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.nb-shell-header__search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.625rem;
+  border: 1px solid var(--theme-elevation-150, #e5e7eb);
+  border-radius: var(--nb-radius-s, 6px);
+  background: var(--theme-elevation-50, #f9fafb);
+  color: var(--theme-elevation-500, #6b7280);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.nb-shell-header__search:hover {
+  background: var(--theme-elevation-100, #f0f1f3);
+  color: var(--theme-text);
+}
+
+.nb-shell-header__search-label {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .nb-shell-header__search-label {
+    display: inline;
+  }
+}
+
+.nb-shell-header__icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--theme-elevation-150, #e5e7eb);
+  border-radius: var(--nb-radius-s, 6px);
+  background: var(--theme-elevation-50, #f9fafb);
+  color: var(--theme-elevation-500, #6b7280);
+  cursor: pointer;
+}
+
+.nb-shell-header__icon-btn:hover {
+  background: var(--theme-elevation-100, #f0f1f3);
+  color: var(--theme-text);
+}
+
+/* Phone-width nav-open control (F3 fix). The nav drawer only exists <=900px
+   (see `.nb-shell-nav` mobile drawer rules above), so this button is only
+   rendered above 0 width there — hidden at desktop widths where the rail is
+   always visible and there is nothing for it to open. */
+.nb-shell-header__nav-toggle {
+  display: none;
+  flex: none;
+}
+
+@media (max-width: 900px) {
+  .nb-shell-header__nav-toggle {
+    display: flex;
+  }
+}

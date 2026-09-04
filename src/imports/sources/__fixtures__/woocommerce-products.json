@@ -1,0 +1,436 @@
+[
+  {
+    "id": 1475,
+    "name": "Replacement Set Screw and Allen Wrench Kit",
+    "slug": "replacement-set-screw-and-allen-wrench-kit",
+    "parent": 0,
+    "type": "variable",
+    "variation": "",
+    "permalink": "https://barefootbuttons.com/product/replacement-set-screw-and-allen-wrench-kit/",
+    "sku": "18-AC-AS-02",
+    "short_description": "",
+    "description": "<p class=\"isSelectedEnd\">Every Barefoot Button includes the hardware needed for installation, but sometimes extra parts come in handy.</p>\n<p class=\"isSelectedEnd\">Whether you&#8217;re setting up additional buttons, replacing lost hardware, or keeping spare parts in your gig bag, this Replacement Set Screw &amp; Allen Wrench Kit makes it easy to keep your Barefoot Buttons ready to go.</p>\n<p class",
+    "on_sale": false,
+    "prices": {
+      "price": "195",
+      "regular_price": "195",
+      "sale_price": "195",
+      "price_range": null,
+      "currency_code": "USD",
+      "currency_symbol": "$",
+      "currency_minor_unit": 2,
+      "currency_decimal_separator": ".",
+      "currency_thousand_separator": ",",
+      "currency_prefix": "$",
+      "currency_suffix": ""
+    },
+    "price_html": "<span class=\"woocommerce-Price-amount amount\"><span class=\"woocommerce-Price-currencySymbol\">&#036;</span>1.95</span>",
+    "average_rating": "0",
+    "review_count": 0,
+    "images": [
+      {
+        "id": 1476,
+        "src": "https://barefootbuttons.com/wp-content/uploads/2026/06/set-screws-allen-wrench-prodcut.png",
+        "thumbnail": "https://barefootbuttons.com/wp-content/uploads/2026/06/set-screws-allen-wrench-prodcut-247x296.png",
+        "srcset": "https://barefootbuttons.com/wp-content/uploads/2026/06/set-screws-allen-wrench-prodcut.png 1080w, https://barefootbuttons.com/wp-content/uploads/2026/06/set-screws-allen-wrench-prodcut-400x400.png 400w, https://barefootbuttons.com/wp-content/uploads/2026/06/set-screws-allen-wrench-prodcut-800x800.png 800w, https://barefootbuttons.com/wp-content/uploads/2026/06/set-screws-allen-wrench-prodcut-280x280.png 280w, https://barefootbuttons.com/wp-content/uploads/2026/06/set-screws-allen-wrench-prodcut-768x768.png 768w, https://barefootbuttons.com/wp-content/uploads/2026/06/set-screws-allen-wrench-prodcut-510x510.png 510w, https://barefootbuttons.com/wp-content/uploads/2026/06/set-screws-allen-wrench-prodcut-100x100.png 100w",
+        "sizes": "(max-width: 1080px) 100vw, 1080px",
+        "thumbnail_srcset": "",
+        "thumbnail_sizes": "(max-width: 247px) 100vw, 247px",
+        "name": "Barefoot Buttons Replacement Set Screw and Allen Wrench Kit",
+        "alt": "Barefoot Buttons replacement hardware kit including a nAllen wrench and 6 set screws of size slected packaged in a clear resealable bag on a white background."
+      }
+    ],
+    "categories": [
+      {
+        "id": 85,
+        "name": "Accessories",
+        "slug": "accessories",
+        "link": "https://barefootbuttons.com/product-category/accessories/"
+      }
+    ],
+    "tags": [],
+    "brands": [],
+    "attributes": [
+      {
+        "id": 0,
+        "name": "Set Screw Size",
+        "taxonomy": null,
+        "has_variations": true,
+        "terms": [
+          {
+            "id": 0,
+            "name": "For V1/V2 Mini and V1/V2 Tallboy Mini",
+            "slug": "For V1/V2 Mini and V1/V2 Tallboy Mini"
+          },
+          {
+            "id": 0,
+            "name": "For V1/V2 Standard, V1/V2 Standard Skirtless & V1/V2 Tallboy",
+            "slug": "For V1/V2 Standard, V1/V2 Standard Skirtless & V1/V2 Tallboy"
+          },
+          {
+            "id": 0,
+            "name": "For Big Bore Standard, Big Bore Standard Skirtless, Big Bore Tallboy & Max Bore",
+            "slug": "For Big Bore Standard, Big Bore Standard Skirtless, Big Bore Tallboy & Max Bore"
+          }
+        ]
+      }
+    ],
+    "variations": [
+      {
+        "id": 1485,
+        "attributes": [
+          {
+            "name": "Set Screw Size",
+            "value": null
+          }
+        ]
+      }
+    ],
+    "grouped_products": [],
+    "has_options": true,
+    "is_purchasable": true,
+    "is_in_stock": true,
+    "is_on_backorder": false,
+    "low_stock_remaining": null,
+    "stock_availability": {
+      "text": "99 in stock",
+      "class": "in-stock"
+    },
+    "sold_individually": false,
+    "weight": "",
+    "dimensions": {
+      "length": "",
+      "width": "",
+      "height": ""
+    },
+    "formatted_weight": "N/A",
+    "formatted_dimensions": "N/A",
+    "add_to_cart": {
+      "text": "Select options",
+      "description": "Select options for &ldquo;Replacement Set Screw and Allen Wrench Kit&rdquo;",
+      "url": "https://barefootbuttons.com/product/replacement-set-screw-and-allen-wrench-kit/",
+      "single_text": "Add to cart",
+      "minimum": 1,
+      "maximum": 99,
+      "multiple_of": 1
+    },
+    "is_password_protected": false,
+    "extensions": {},
+    "_links": {
+      "self": [
+        {
+          "href": "https://barefootbuttons.com/wp-json/wc/store/v1/products/1475",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://barefootbuttons.com/wp-json/wc/store/v1/products"
+        }
+      ],
+      "related": [
+        {
+          "embeddable": true,
+          "href": "https://barefootbuttons.com/wp-json/wc/store/v1/products?related=1475&per_page=10"
+        }
+      ]
+    }
+  },
+  {
+    "id": 1298,
+    "name": "Spacers- Pack of 4",
+    "slug": "spacers-pack-of-4",
+    "parent": 0,
+    "type": "simple",
+    "variation": "",
+    "permalink": "https://barefootbuttons.com/product/spacers-pack-of-4/",
+    "sku": "18-AC-NS-01",
+    "short_description": "",
+    "description": "<p data-start=\"16\" data-end=\"76\">Sometimes a pedal setup needs just a little extra clearance.</p>\n<p data-start=\"78\" data-end=\"450\">Barefoot Buttons Spacers are designed to raise the button slightly when a switch head is too short for the set screws to fully secure against, or when additional height clearance is needed around LED rings or recessed switch areas. Installed inside the bore of the but",
+    "on_sale": false,
+    "prices": {
+      "price": "195",
+      "regular_price": "195",
+      "sale_price": "195",
+      "price_range": null,
+      "currency_code": "USD",
+      "currency_symbol": "$",
+      "currency_minor_unit": 2,
+      "currency_decimal_separator": ".",
+      "currency_thousand_separator": ",",
+      "currency_prefix": "$",
+      "currency_suffix": ""
+    },
+    "price_html": "<span class=\"woocommerce-Price-amount amount\"><span class=\"woocommerce-Price-currencySymbol\">&#036;</span>1.95</span>",
+    "average_rating": "0",
+    "review_count": 0,
+    "images": [
+      {
+        "id": 554,
+        "src": "https://barefootbuttons.com/wp-content/uploads/2026/04/spcaer-2.png",
+        "thumbnail": "https://barefootbuttons.com/wp-content/uploads/2026/04/spcaer-2-247x296.png",
+        "srcset": "https://barefootbuttons.com/wp-content/uploads/2026/04/spcaer-2.png 700w, https://barefootbuttons.com/wp-content/uploads/2026/04/spcaer-2-100x100.png 100w, https://barefootbuttons.com/wp-content/uploads/2026/04/spcaer-2-510x510.png 510w, https://barefootbuttons.com/wp-content/uploads/2026/04/spcaer-2-400x400.png 400w, https://barefootbuttons.com/wp-content/uploads/2026/04/spcaer-2-280x280.png 280w",
+        "sizes": "(max-width: 700px) 100vw, 700px",
+        "thumbnail_srcset": "",
+        "thumbnail_sizes": "(max-width: 247px) 100vw, 247px",
+        "name": "Barefoot Buttons Spacer Insert",
+        "alt": "Barefoot Buttons spacer insert used to adjust fit inside the button bore"
+      }
+    ],
+    "categories": [
+      {
+        "id": 85,
+        "name": "Accessories",
+        "slug": "accessories",
+        "link": "https://barefootbuttons.com/product-category/accessories/"
+      }
+    ],
+    "tags": [],
+    "brands": [],
+    "attributes": [],
+    "variations": [],
+    "grouped_products": [],
+    "has_options": false,
+    "is_purchasable": true,
+    "is_in_stock": true,
+    "is_on_backorder": false,
+    "low_stock_remaining": null,
+    "stock_availability": {
+      "text": "",
+      "class": "in-stock"
+    },
+    "sold_individually": false,
+    "weight": "",
+    "dimensions": {
+      "length": "",
+      "width": "",
+      "height": ""
+    },
+    "formatted_weight": "N/A",
+    "formatted_dimensions": "N/A",
+    "add_to_cart": {
+      "text": "Add to cart",
+      "description": "Add to cart: &ldquo;Spacers- Pack of 4&rdquo;",
+      "url": "/wp-json/wc/store/v1/products?per_page=20&#038;add-to-cart=1298",
+      "single_text": "Add to cart",
+      "minimum": 1,
+      "maximum": 9999,
+      "multiple_of": 1
+    },
+    "is_password_protected": false,
+    "extensions": {},
+    "_links": {
+      "self": [
+        {
+          "href": "https://barefootbuttons.com/wp-json/wc/store/v1/products/1298",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://barefootbuttons.com/wp-json/wc/store/v1/products"
+        }
+      ],
+      "related": [
+        {
+          "embeddable": true,
+          "href": "https://barefootbuttons.com/wp-json/wc/store/v1/products?related=1298&per_page=10"
+        }
+      ]
+    }
+  },
+  {
+    "id": 1296,
+    "name": "Barefoot Buttons Max Bore Standard Silver- Guitar Pedal Footswitch Topper",
+    "slug": "max-bore-standard-silver-footswitch-topper",
+    "parent": 0,
+    "type": "simple",
+    "variation": "",
+    "permalink": "https://barefootbuttons.com/product/max-bore-standard-silver-footswitch-topper/",
+    "sku": "20-V1-MB-SV",
+    "short_description": "",
+    "description": "<p>The Max Bore Standard Silver delivers the premium look, feel, and control Barefoot Buttons are known for in a sleek anodized aluminum finish. Designed for footswitches with a 1/2&#8243; (13 mm) switch head diameter, the Max Bore fills an important gap in the lineup, providing the same uncompromising fit and performance for larger, less common switches. No matter the setup, Barefoot Buttons has ",
+    "on_sale": false,
+    "prices": {
+      "price": "995",
+      "regular_price": "995",
+      "sale_price": "995",
+      "price_range": null,
+      "currency_code": "USD",
+      "currency_symbol": "$",
+      "currency_minor_unit": 2,
+      "currency_decimal_separator": ".",
+      "currency_thousand_separator": ",",
+      "currency_prefix": "$",
+      "currency_suffix": ""
+    },
+    "price_html": "<span class=\"woocommerce-Price-amount amount\"><span class=\"woocommerce-Price-currencySymbol\">&#036;</span>9.95</span>",
+    "average_rating": "0",
+    "review_count": 0,
+    "images": [
+      {
+        "id": 1261,
+        "src": "https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper.png",
+        "thumbnail": "https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-247x296.png",
+        "srcset": "https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper.png 2000w, https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-100x100.png 100w, https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-510x510.png 510w, https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-400x400.png 400w, https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-800x800.png 800w, https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-280x280.png 280w, https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-768x768.png 768w, https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-1536x1536.png 1536w",
+        "sizes": "(max-width: 2000px) 100vw, 2000px",
+        "thumbnail_srcset": "",
+        "thumbnail_sizes": "(max-width: 247px) 100vw, 247px",
+        "name": "Barefoot Buttons Max Bore Standard Silver",
+        "alt": "Barefoot Buttons Max Bore Standard Silver guitar pedal footswitch topper top view for large footswitches 1/2\" (13mm)"
+      },
+      {
+        "id": 1260,
+        "src": "https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-bottom.png",
+        "thumbnail": "https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-bottom-247x296.png",
+        "srcset": "https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-bottom.png 2000w, https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-bottom-100x100.png 100w, https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-bottom-510x510.png 510w, https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-bottom-400x400.png 400w, https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-bottom-800x800.png 800w, https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-bottom-280x280.png 280w, https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-bottom-768x768.png 768w, https://barefootbuttons.com/wp-content/uploads/2026/05/barefoot-buttons-max-bore-standard-silver-footswitch-topper-bottom-1536x1536.png 1536w",
+        "sizes": "(max-width: 2000px) 100vw, 2000px",
+        "thumbnail_srcset": "",
+        "thumbnail_sizes": "(max-width: 247px) 100vw, 247px",
+        "name": "Barefoot Buttons Max Bore Standard Silver",
+        "alt": "Barefoot Buttons Max Bore Standard Silver guitar pedal footswitch topper bottom view for large footswitches 1/2\" (13mm)"
+      },
+      {
+        "id": 485,
+        "src": "https://barefootbuttons.com/wp-content/uploads/2026/04/max-bore-bore-measurement-image-2.png",
+        "thumbnail": "https://barefootbuttons.com/wp-content/uploads/2026/04/max-bore-bore-measurement-image-2-247x296.png",
+        "srcset": "https://barefootbuttons.com/wp-content/uploads/2026/04/max-bore-bore-measurement-image-2.png 1200w, https://barefootbuttons.com/wp-content/uploads/2026/04/max-bore-bore-measurement-image-2-100x100.png 100w, https://barefootbuttons.com/wp-content/uploads/2026/04/max-bore-bore-measurement-image-2-510x510.png 510w, https://barefootbuttons.com/wp-content/uploads/2026/04/max-bore-bore-measurement-image-2-400x400.png 400w, https://barefootbuttons.com/wp-content/uploads/2026/04/max-bore-bore-measurement-image-2-800x800.png 800w, https://barefootbuttons.com/wp-content/uploads/2026/04/max-bore-bore-measurement-image-2-280x280.png 280w, https://barefootbuttons.com/wp-content/uploads/2026/04/max-bore-bore-measurement-image-2-768x768.png 768w",
+        "sizes": "(max-width: 1200px) 100vw, 1200px",
+        "thumbnail_srcset": "",
+        "thumbnail_sizes": "(max-width: 247px) 100vw, 247px",
+        "name": "Barefoot Buttons Max Bore 1/2 Inch Bore Measurement",
+        "alt": "Barefoot Buttons Max Bore footswitch topper with 1/2 inch 13mm bore measurement shown next to 1/2inch switch"
+      },
+      {
+        "id": 670,
+        "src": "https://barefootbuttons.com/wp-content/uploads/2026/04/standard-size-comparison-1-1.svg",
+        "thumbnail": "https://barefootbuttons.com/wp-content/uploads/2026/04/standard-size-comparison-1-1.svg",
+        "srcset": "",
+        "sizes": "",
+        "thumbnail_srcset": "",
+        "thumbnail_sizes": "(max-width: 1px) 100vw, 1px",
+        "name": "Barefoot Buttons V1 Standard Size Diagram",
+        "alt": "Barefoot Buttons V1 Standard size comparison guitar pedal footswitch topper showing dimensions 1 1/8 inch diameter 1/2 inch height"
+      }
+    ],
+    "categories": [
+      {
+        "id": 33,
+        "name": "Max Bore",
+        "slug": "max-bore",
+        "link": "https://barefootbuttons.com/product-category/max-bore/"
+      }
+    ],
+    "tags": [
+      {
+        "id": 84,
+        "name": "Max Bore Standard",
+        "slug": "max-bore-standard",
+        "link": "https://barefootbuttons.com/product-tag/max-bore-standard/"
+      },
+      {
+        "id": 53,
+        "name": "Silver",
+        "slug": "silver",
+        "link": "https://barefootbuttons.com/product-tag/silver/"
+      },
+      {
+        "id": 54,
+        "name": "Standard",
+        "slug": "standard",
+        "link": "https://barefootbuttons.com/product-tag/standard/"
+      }
+    ],
+    "brands": [],
+    "attributes": [
+      {
+        "id": 2,
+        "name": "Color",
+        "taxonomy": "pa_color",
+        "has_variations": false,
+        "terms": [
+          {
+            "id": 40,
+            "name": "Silver",
+            "slug": "silver"
+          }
+        ]
+      },
+      {
+        "id": 1,
+        "name": "Size",
+        "taxonomy": "pa_size",
+        "has_variations": false,
+        "terms": [
+          {
+            "id": 34,
+            "name": "Standard",
+            "slug": "standard"
+          }
+        ]
+      }
+    ],
+    "variations": [],
+    "grouped_products": [],
+    "has_options": false,
+    "is_purchasable": true,
+    "is_in_stock": true,
+    "is_on_backorder": false,
+    "low_stock_remaining": null,
+    "stock_availability": {
+      "text": "167 in stock",
+      "class": "in-stock"
+    },
+    "sold_individually": false,
+    "weight": "",
+    "dimensions": {
+      "length": "",
+      "width": "",
+      "height": ""
+    },
+    "formatted_weight": "N/A",
+    "formatted_dimensions": "N/A",
+    "add_to_cart": {
+      "text": "Add to cart",
+      "description": "Add to cart: &ldquo;Barefoot Buttons Max Bore Standard Silver- Guitar Pedal Footswitch Topper&rdquo;",
+      "url": "/wp-json/wc/store/v1/products?per_page=20&#038;add-to-cart=1296",
+      "single_text": "Add to cart",
+      "minimum": 1,
+      "maximum": 167,
+      "multiple_of": 1
+    },
+    "is_password_protected": false,
+    "extensions": {},
+    "_links": {
+      "self": [
+        {
+          "href": "https://barefootbuttons.com/wp-json/wc/store/v1/products/1296",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://barefootbuttons.com/wp-json/wc/store/v1/products"
+        }
+      ],
+      "related": [
+        {
+          "embeddable": true,
+          "href": "https://barefootbuttons.com/wp-json/wc/store/v1/products?related=1296&per_page=10"
+        }
+      ]
+    }
+  }
+]
