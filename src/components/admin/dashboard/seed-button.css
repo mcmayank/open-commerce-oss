@@ -1,0 +1,42 @@
+/* SeedSampleProductsButton — the sample-catalogue picker dropdown.
+   Colour comes only from --theme-* tokens (Payload's admin theme); no literals here. */
+
+.nb-onboard__seed { position: relative; display: inline-block; }
+
+.nb-onboard__seed-menu {
+  position: absolute; right: 0; top: calc(100% + 4px); z-index: 20;
+  min-width: 230px; margin: 0; padding: 4px;
+  background: var(--theme-elevation-0); border: 1px solid var(--theme-elevation-150);
+  border-radius: 4px; box-shadow: 0 6px 20px color-mix(in srgb, var(--theme-elevation-1000) 12%, transparent);
+}
+
+.nb-onboard__seed-list { list-style: none; margin: 0; padding: 0; }
+
+.nb-onboard__seed-menu button {
+  display: block; width: 100%; padding: 8px 12px; text-align: left;
+  background: none; border: 0; cursor: pointer; font: inherit;
+  color: var(--theme-elevation-800); border-radius: 3px;
+}
+
+.nb-onboard__seed-label { display: block; }
+
+.nb-onboard__seed-detail {
+  display: block; font-size: 0.75rem; line-height: 1.3; margin-top: 1px;
+  color: var(--theme-elevation-500);
+}
+
+/* The pre-seed disclosure. Shown with the options, before the merchant picks. */
+.nb-onboard__seed-note {
+  margin: 4px 0 0; padding: 8px 12px; max-width: 30ch;
+  border-top: 1px solid var(--theme-elevation-100);
+  font-size: 0.75rem; line-height: 1.4;
+  color: var(--theme-elevation-500);
+}
+
+.nb-onboard__seed-menu button:hover,
+.nb-onboard__seed-menu button:focus-visible { background: var(--theme-elevation-100); }
+
+.nb-onboard__seed-error {
+  margin: 8px 0 0; font-size: 0.8rem; color: var(--theme-error-500);
+  max-width: 32ch; text-align: right;
+}

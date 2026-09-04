@@ -1,0 +1,21 @@
+{
+  "regions": ["bom1"],
+  "crons": [
+    {
+      "path": "/api/marketing/process",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/release-gift-cards",
+      "schedule": "0 4 * * *"
+    }
+  ],
+  "functions": {
+    "src/app/api/marketing/process/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/cron/release-gift-cards/route.ts": {
+      "maxDuration": 60
+    }
+  }
+}
